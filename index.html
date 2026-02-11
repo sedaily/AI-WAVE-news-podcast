@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이슈캐스트</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 메인 화면: 이슈맵 -->
+        <div id="issueMap" class="screen active">
+            <header>
+                <h1>🎧 이슈캐스트</h1>
+                <p class="subtitle">오늘의 핫이슈를 팟캐스트로</p>
+            </header>
+            <div class="issue-map-container">
+                <div class="issue-map-header">
+                    <h2>오늘의 이슈 맵</h2>
+                    <p>하루 동안 가장 중요한 이슈들을 선정해서 보여드려요!</p>
+                </div>
+                <div class="issue-network" id="issueNetwork"></div>
+            </div>
+        </div>
+
+        <!-- 팟캐스트 플레이어 화면 -->
+        <div id="player" class="screen">
+            <div class="player-header">
+                <span></span>
+                <button class="close-btn" onclick="goBack()">˅</button>
+            </div>
+            <div class="player-container">
+                <div class="album-cover" id="albumCover"></div>
+                <div class="track-info">
+                    <h2 id="trackTitle"></h2>
+                    <p id="trackKeyword"></p>
+                </div>
+                <div class="transcript-container" id="transcriptContainer">
+                    <div class="transcript-content" id="transcriptContent"></div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                    <div class="time-info">
+                        <span class="current-time" id="currentTime">0:00</span>
+                        <span class="total-time" id="duration">0:00</span>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="control-btn hidden-btn" style="opacity: 0; pointer-events: none;">⏮</button>
+                    <button class="control-btn skip-btn" onclick="skipBackward()">⏪</button>
+                    <button class="control-btn play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+                    <button class="control-btn skip-btn" onclick="skipForward()">⏩</button>
+                    <button class="control-btn summary-btn" onclick="showSummary()">🤖</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 인포그래픽 요약 화면 -->
+        <div id="summary" class="screen">
+            <div class="summary-header">
+                <span></span>
+                <button class="close-btn" onclick="backToPlayer()">˅</button>
+            </div>
+            <div class="summary-container">
+                <h2 id="summaryTitle"></h2>
+                <div class="infographic" id="infographic"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
