@@ -149,3 +149,24 @@ const podcastData = {
         ]
     }
 };
+
+
+const API_ENDPOINT = 'https://chzwwtjtgk.execute-api.us-east-1.amazonaws.com/dev';
+
+async function loadPodcastData() {
+  const categories = ['ai', 'economy', 'tech', 'climate'];
+  
+  for (const category of categories) {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/podcasts/${category}`);
+      const data = await response.json();
+      podcastData[category] = data[category];
+    } catch (error) {
+      console.error(`Failed to load ${category}:`, error);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  loadPodcastData();
+}

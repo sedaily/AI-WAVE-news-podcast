@@ -1,5 +1,6 @@
+import { useState, useRef, useEffect } from 'react';
 import type { PodcastKey } from '../types/podcast';
-import { podcastData, issueNodes } from '../data/podcastData';
+import { podcastData, issueNodes as initialNodes } from '../data/podcastData';
 
 interface IssueMapProps {
   onSelectPodcast: (key: PodcastKey) => void;
@@ -11,13 +12,104 @@ function formatDuration(seconds: number): string {
 }
 
 function IssueMap({ onSelectPodcast }: IssueMapProps) {
-  // Generate connection lines between nodes
+  const [nodes, setNodes] = useState(() => 
+    initialNodes.map((node, i) => ({
+      ...node,
+      angle: (Math.PI * 2 * i) / initialNodes.length + Math.random() * 0.5,
+      radius: 15 + Math.random() * 20,
+      speed: 0.0001 + Math.random() * 0.00008,
+      isDragged: false,
+    }))
+  );
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [hasDragged, setHasDragged] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let animationId: number;
+    const animate = () => {
+      if (dragging === null) {
+        setNodes(prev => {
+          const updated = prev.map(node => {
+            const newAngle = node.angle + node.speed;
+            return {
+              ...node,
+              angle: newAngle,
+              x: 50 + Math.cos(newAngle) * node.radius,
+              y: 50 + Math.sin(newAngle) * node.radius,
+            };
+          });
+          
+          const avgX = updated.reduce((sum, n) => sum + n.x, 0) / updated.length;
+          const avgY = updated.reduce((sum, n) => sum + n.y, 0) / updated.length;
+          const offsetX = 50 - avgX;
+          const offsetY = 50 - avgY;
+          
+          return updated.map(node => ({
+            ...node,
+            x: node.x + offsetX * 0.01,
+            y: node.y + offsetY * 0.01,
+          }));
+        });
+      }
+      animationId = requestAnimationFrame(animate);
+    };
+    animationId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationId);
+  }, [dragging]);
+
+  const getNodeRadius = (size: string) => {
+    if (size === 'large') return 70;
+    if (size === 'medium') return 55;
+    return 42.5;
+  };
+
   const connections = [
-    { from: 0, to: 1 },
-    { from: 0, to: 2 },
-    { from: 1, to: 3 },
-    { from: 2, to: 3 },
+    { from: 0, to: 1, weight: 0.8 },
+    { from: 0, to: 2, weight: 0.1 },
+    { from: 1, to: 3, weight: 0.4 },
+    { from: 2, to: 3, weight: 0.4 },
+    { from: 0, to: 3, weight: 0.9 },
+    { from: 1, to: 2, weight: 0.9 },
   ];
+
+  const handleMouseDown = (index: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(index);
+    setHasDragged(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (dragging === null || !containerRef.current) return;
+
+    setHasDragged(true);
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    setNodes(prev => prev.map((node, i) => {
+      if (i === dragging) {
+        const newX = Math.max(5, Math.min(95, x));
+        const newY = Math.max(5, Math.min(95, y));
+        const newAngle = Math.atan2(newY - 50, newX - 50);
+        const newRadius = Math.sqrt(Math.pow(newX - 50, 2) + Math.pow(newY - 50, 2));
+        return { ...node, x: newX, y: newY, angle: newAngle, radius: newRadius, isDragged: true };
+      }
+      return node;
+    }));
+  };
+
+  const handleMouseUp = () => {
+    setDragging(null);
+  };
+
+  const handleClick = (key: PodcastKey, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!hasDragged) {
+      onSelectPodcast(key);
+    }
+  };
 
   return (
     <section className="issue-map-section">
@@ -26,38 +118,68 @@ function IssueMap({ onSelectPodcast }: IssueMapProps) {
         <p>클릭하여 팟캐스트 듣기</p>
       </div>
 
-      <div className="issue-network">
-        {/* SVG Connection Lines */}
-        <svg className="network-lines">
+      <div 
+        className="issue-network"
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <svg className="network-lines" width="100%" height="100%">
           {connections.map((conn, index) => {
-            const fromNode = issueNodes[conn.from];
-            const toNode = issueNodes[conn.to];
+            const fromNode = nodes[conn.from];
+            const toNode = nodes[conn.to];
+            
+            const dx = toNode.x - fromNode.x;
+            const dy = toNode.y - fromNode.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance === 0) return null;
+            
+            const fromRadius = getNodeRadius(fromNode.size) / 7;
+            const toRadius = getNodeRadius(toNode.size) / 7;
+            
+            const x1 = fromNode.x + (dx / distance) * fromRadius;
+            const y1 = fromNode.y + (dy / distance) * fromRadius;
+            const x2 = toNode.x - (dx / distance) * toRadius;
+            const y2 = toNode.y - (dy / distance) * toRadius;
+            
             return (
               <line
                 key={index}
-                x1={`${fromNode.x}%`}
-                y1={`${fromNode.y}%`}
-                x2={`${toNode.x}%`}
-                y2={`${toNode.y}%`}
+                x1={`${x1}%`}
+                y1={`${y1}%`}
+                x2={`${x2}%`}
+                y2={`${y2}%`}
+                stroke="#ffffff"
+                strokeWidth={2 + conn.weight * 18}
+                opacity={0.2 + conn.weight * 0.4}
+                style={{ strokeWidth: `${2 + conn.weight * 18}px` }}
               />
             );
           })}
         </svg>
 
-        {/* Issue Nodes */}
-        {issueNodes.map((node) => {
+        {nodes.map((node, index) => {
           const podcast = podcastData[node.key];
+          const isDragging = dragging === index;
           return (
             <div
-              key={node.key}
-              className={`issue-node ${node.size}`}
+              key={index}
+              className={`issue-node ${node.size} ${isDragging ? 'dragging' : ''}`}
               style={{
                 left: `${node.x}%`,
                 top: `${node.y}%`,
-                transform: 'translate(-50%, -50%)',
+                transform: `translate(-50%, -50%) scale(${isDragging ? 1.1 : 1})`,
                 background: `linear-gradient(135deg, ${node.color}40, ${node.color}20)`,
+                cursor: isDragging ? 'grabbing' : 'grab',
+                transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+                zIndex: isDragging ? 1000 : 1,
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
               }}
-              onClick={() => onSelectPodcast(node.key)}
+              onMouseDown={(e) => handleMouseDown(index, e)}
+              onClick={(e) => handleClick(node.key, e)}
             >
               <div className="issue-node-inner">
                 <span className="issue-node-keyword">{podcast.keyword}</span>
