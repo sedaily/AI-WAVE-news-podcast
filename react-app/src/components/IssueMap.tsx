@@ -15,9 +15,9 @@ function IssueMap({ onSelectPodcast }: IssueMapProps) {
   const [nodes, setNodes] = useState(() => 
     initialNodes.map((node, i) => ({
       ...node,
-      angle: (Math.PI * 2 * i) / initialNodes.length,
-      radius: 20 + Math.random() * 15,
-      speed: 0.00005 + Math.random() * 0.00003,
+      angle: (Math.PI * 2 * i) / initialNodes.length + Math.random() * 0.5,
+      radius: 15 + Math.random() * 20,
+      speed: 0.0001 + Math.random() * 0.00008,
       isDragged: false,
     }))
   );
@@ -29,16 +29,28 @@ function IssueMap({ onSelectPodcast }: IssueMapProps) {
     let animationId: number;
     const animate = () => {
       if (dragging === null) {
-        setNodes(prev => prev.map(node => {
-          if (node.isDragged) return node;
-          const newAngle = node.angle + node.speed;
-          return {
+        setNodes(prev => {
+          const updated = prev.map(node => {
+            const newAngle = node.angle + node.speed;
+            return {
+              ...node,
+              angle: newAngle,
+              x: 50 + Math.cos(newAngle) * node.radius,
+              y: 50 + Math.sin(newAngle) * node.radius,
+            };
+          });
+          
+          const avgX = updated.reduce((sum, n) => sum + n.x, 0) / updated.length;
+          const avgY = updated.reduce((sum, n) => sum + n.y, 0) / updated.length;
+          const offsetX = 50 - avgX;
+          const offsetY = 50 - avgY;
+          
+          return updated.map(node => ({
             ...node,
-            angle: newAngle,
-            x: 50 + Math.cos(newAngle) * node.radius,
-            y: 50 + Math.sin(newAngle) * node.radius,
-          };
-        }));
+            x: node.x + offsetX * 0.01,
+            y: node.y + offsetY * 0.01,
+          }));
+        });
       }
       animationId = requestAnimationFrame(animate);
     };
@@ -76,9 +88,16 @@ function IssueMap({ onSelectPodcast }: IssueMapProps) {
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    setNodes(prev => prev.map((node, i) => 
-      i === dragging ? { ...node, x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)), isDragged: true } : node
-    ));
+    setNodes(prev => prev.map((node, i) => {
+      if (i === dragging) {
+        const newX = Math.max(5, Math.min(95, x));
+        const newY = Math.max(5, Math.min(95, y));
+        const newAngle = Math.atan2(newY - 50, newX - 50);
+        const newRadius = Math.sqrt(Math.pow(newX - 50, 2) + Math.pow(newY - 50, 2));
+        return { ...node, x: newX, y: newY, angle: newAngle, radius: newRadius, isDragged: true };
+      }
+      return node;
+    }));
   };
 
   const handleMouseUp = () => {
@@ -154,7 +173,7 @@ function IssueMap({ onSelectPodcast }: IssueMapProps) {
                 transform: `translate(-50%, -50%) scale(${isDragging ? 1.1 : 1})`,
                 background: `linear-gradient(135deg, ${node.color}40, ${node.color}20)`,
                 cursor: isDragging ? 'grabbing' : 'grab',
-                transition: isDragging ? 'none' : 'all 0.3s ease-out',
+                transition: isDragging ? 'none' : 'transform 0.3s ease-out',
                 zIndex: isDragging ? 1000 : 1,
                 userSelect: 'none',
                 WebkitUserSelect: 'none',
