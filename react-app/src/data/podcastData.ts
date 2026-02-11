@@ -157,8 +157,8 @@ export const podcastData: PodcastData = {
 };
 
 export const issueNodes: IssueNode[] = [
-  { key: 'ai', x: 30, y: 35, size: 'large', color: '#6b9b8e' },
-  { key: 'economy', x: 70, y: 40, size: 'large', color: '#8b7ba8' },
-  { key: 'tech', x: 25, y: 75, size: 'medium', color: '#7ba3c0' },
-  { key: 'climate', x: 75, y: 80, size: 'medium', color: '#7cb89d' }
+  { key: 'ai', x: 25, y: 30, size: 'large', color: '#ffffff' },
+  { key: 'economy', x: 75, y: 30, size: 'large', color: '#ffffff' },
+  { key: 'tech', x: 25, y: 70, size: 'large', color: '#ffffff' },
+  { key: 'climate', x: 75, y: 70, size: 'large', color: '#ffffff' }
 ];

@@ -3,6 +3,7 @@ let currentPodcast = null;
 let isPlaying = false;
 let currentTime = 0;
 let progressInterval = null;
+let audioElement = null;
 
 // 드래그 상태
 let isDragging = false;
@@ -14,7 +15,23 @@ let playerStartY = 0;
 document.addEventListener('DOMContentLoaded', () => {
     renderIssueMap();
     initProgressBarDrag();
+    initAudio();
 });
+
+// 오디오 초기화
+function initAudio() {
+    audioElement = new Audio();
+    audioElement.addEventListener('timeupdate', () => {
+        if (audioElement.duration) {
+            currentTime = Math.floor(audioElement.currentTime);
+            updateProgress();
+        }
+    });
+    audioElement.addEventListener('ended', () => {
+        isPlaying = false;
+        document.getElementById('playBtn').textContent = '▶';
+    });
+}
 
 // 이슈맵 렌더링
 function renderIssueMap() {
@@ -62,10 +79,21 @@ function renderIssueMap() {
 }
 
 // 팟캐스트 열기
-function openPodcast(key) {
+async function openPodcast(key) {
     currentPodcast = podcastData[key];
     currentTime = 0;
     isPlaying = false;
+    
+    // ElevenLabs로 오디오 생성
+    if (!currentPodcast.audioUrl) {
+        await generateAudioFromTranscript();
+    }
+    
+    // 오디오 설정
+    if (currentPodcast.audioUrl) {
+        audioElement.src = currentPodcast.audioUrl;
+        audioElement.load();
+    }
     
     // 앨범 커버 설정 및 인포그래픽
     const albumCover = document.getElementById('albumCover');
@@ -100,6 +128,49 @@ function openPodcast(key) {
     
     // 화면 전환
     showScreen('player');
+}
+
+// ElevenLabs TTS 생성
+async function generateAudioFromTranscript() {
+    const ELEVENLABS_API_KEY = 'sk_ce1357648ecc0ee7a2248034ac018ef53ea2f7517214beb2';
+    const VOICE_ID = 'pNInz6obpgDQGcFmaJgB';
+    
+    const fullText = currentPodcast.transcript.map(s => s.text).join(' ');
+    
+    console.log('Generating audio...', fullText.substring(0, 50));
+    
+    try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'xi-api-key': ELEVENLABS_API_KEY
+            },
+            body: JSON.stringify({
+                text: fullText,
+                model_id: 'eleven_multilingual_v2',
+                voice_settings: {
+                    stability: 0.5,
+                    similarity_boost: 0.75
+                }
+            })
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (response.ok) {
+            const audioBlob = await response.blob();
+            currentPodcast.audioUrl = URL.createObjectURL(audioBlob);
+            console.log('Audio generated:', currentPodcast.audioUrl);
+        } else {
+            const errorText = await response.text();
+            console.error('ElevenLabs API error:', response.status, errorText);
+            alert(`오디오 생성 실패: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Failed to generate audio:', error);
+        alert('오디오 생성 중 오류 발생');
+    }
 }
 
 // 대본 렌더링
@@ -139,14 +210,16 @@ function updateTranscript() {
 
 // 재생/일시정지
 function togglePlay() {
+    if (!audioElement.src) return;
+    
     isPlaying = !isPlaying;
     const playBtn = document.getElementById('playBtn');
     playBtn.textContent = isPlaying ? '⏸' : '▶';
     
     if (isPlaying) {
-        startProgress();
+        audioElement.play();
     } else {
-        stopProgress();
+        audioElement.pause();
     }
 }
 
@@ -187,13 +260,15 @@ function formatTime(seconds) {
 
 // 건너뛰기
 function skipBackward() {
-    currentTime = Math.max(0, currentTime - 10);
-    updateProgress();
+    if (audioElement.src) {
+        audioElement.currentTime = Math.max(0, audioElement.currentTime - 10);
+    }
 }
 
 function skipForward() {
-    currentTime = Math.min(currentPodcast.duration, currentTime + 10);
-    updateProgress();
+    if (audioElement.src && audioElement.duration) {
+        audioElement.currentTime = Math.min(audioElement.duration, audioElement.currentTime + 10);
+    }
 }
 
 // 요약 보기
@@ -247,8 +322,15 @@ function showScreen(screenId) {
 function goBack() {
     const player = document.getElementById('player');
     player.style.transform = 'translateY(100%)';
+    
+    // 오디오 정지
+    if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+    }
+    
     setTimeout(() => {
-        stopProgress();
+        isPlaying = false;
         showScreen('issueMap');
         player.style.transform = '';
     }, 400);
