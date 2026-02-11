@@ -1,0 +1,9 @@
+{
+  "name": "economy-news-api",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.400.0",
+    "fast-xml-parser": "^4.3.0"
+  }
+}

@@ -1,8 +1,8 @@
-import type { PodcastKey } from '../types/podcast';
-import { podcastData, issueNodes } from '../data/podcastData';
+import type { EconomyPodcast } from '../hooks/useEconomyNews';
 
 interface IssueMapProps {
-  onSelectPodcast: (key: PodcastKey) => void;
+  podcasts: EconomyPodcast[];
+  onSelectPodcast: (index: number) => void;
 }
 
 function formatDuration(seconds: number): string {
@@ -10,19 +10,31 @@ function formatDuration(seconds: number): string {
   return `${mins}분`;
 }
 
-function IssueMap({ onSelectPodcast }: IssueMapProps) {
+// 노드 위치 (최대 4개)
+const nodePositions = [
+  { x: 30, y: 35, size: 'large' as const },
+  { x: 70, y: 40, size: 'large' as const },
+  { x: 25, y: 75, size: 'medium' as const },
+  { x: 75, y: 80, size: 'medium' as const },
+];
+
+const nodeColors = ['#6b9b8e', '#8b7ba8', '#7ba3c0', '#7cb89d'];
+
+function IssueMap({ podcasts, onSelectPodcast }: IssueMapProps) {
   // Generate connection lines between nodes
-  const connections = [
+  const connections = podcasts.length >= 4 ? [
     { from: 0, to: 1 },
     { from: 0, to: 2 },
     { from: 1, to: 3 },
     { from: 2, to: 3 },
-  ];
+  ] : podcasts.length >= 2 ? [
+    { from: 0, to: 1 },
+  ] : [];
 
   return (
     <section className="issue-map-section">
       <div className="issue-map-title">
-        <h1>오늘의 핵심 이슈</h1>
+        <h1>오늘의 경제 뉴스</h1>
         <p>클릭하여 팟캐스트 듣기</p>
       </div>
 
@@ -30,8 +42,8 @@ function IssueMap({ onSelectPodcast }: IssueMapProps) {
         {/* SVG Connection Lines */}
         <svg className="network-lines">
           {connections.map((conn, index) => {
-            const fromNode = issueNodes[conn.from];
-            const toNode = issueNodes[conn.to];
+            const fromNode = nodePositions[conn.from];
+            const toNode = nodePositions[conn.to];
             return (
               <line
                 key={index}
@@ -45,19 +57,20 @@ function IssueMap({ onSelectPodcast }: IssueMapProps) {
         </svg>
 
         {/* Issue Nodes */}
-        {issueNodes.map((node) => {
-          const podcast = podcastData[node.key];
+        {podcasts.slice(0, 4).map((podcast, index) => {
+          const pos = nodePositions[index];
+          const color = nodeColors[index];
           return (
             <div
-              key={node.key}
-              className={`issue-node ${node.size}`}
+              key={podcast.title}
+              className={`issue-node ${pos.size}`}
               style={{
-                left: `${node.x}%`,
-                top: `${node.y}%`,
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
                 transform: 'translate(-50%, -50%)',
-                background: `linear-gradient(135deg, ${node.color}40, ${node.color}20)`,
+                background: `linear-gradient(135deg, ${color}40, ${color}20)`,
               }}
-              onClick={() => onSelectPodcast(node.key)}
+              onClick={() => onSelectPodcast(index)}
             >
               <div className="issue-node-inner">
                 <span className="issue-node-keyword">{podcast.keyword}</span>

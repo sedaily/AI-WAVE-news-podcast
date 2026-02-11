@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import IssueMap from './components/IssueMap';
 import Player from './components/Player';
-import type { PodcastKey } from './types/podcast';
-import { podcastData } from './data/podcastData';
+import { useEconomyNews, type EconomyPodcast } from './hooks/useEconomyNews';
 import './App.css';
 
 function App() {
-  const [selectedPodcastKey, setSelectedPodcastKey] = useState<PodcastKey | null>(null);
+  const { podcasts, loading, error } = useEconomyNews();
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
-  const handleSelectPodcast = (key: PodcastKey) => {
-    setSelectedPodcastKey(key);
+  const handleSelectPodcast = (index: number) => {
+    setSelectedIndex(index);
   };
 
   const handleClosePlayer = () => {
-    setSelectedPodcastKey(null);
+    setSelectedIndex(null);
   };
 
-  const selectedPodcast = selectedPodcastKey ? podcastData[selectedPodcastKey] : null;
-  const isPlayerActive = selectedPodcastKey !== null;
+  const selectedPodcast: EconomyPodcast | null = selectedIndex !== null ? podcasts[selectedIndex] : null;
+  const isPlayerActive = selectedIndex !== null;
 
   return (
     <div id="app">
@@ -26,16 +26,18 @@ function App() {
         <header className="home-header">
           <div className="brand">
             <div className="brand-logo" />
-            <span className="brand-name">이슈캐스트</span>
+            <span className="brand-name">경제뉴스캐스트</span>
           </div>
           <nav className="home-nav">
-            <span className="nav-link active">오늘의 이슈</span>
+            <span className="nav-link active">오늘의 경제</span>
             <span className="nav-link">인기 콘텐츠</span>
             <span className="nav-link">아카이브</span>
           </nav>
         </header>
 
-        <IssueMap onSelectPodcast={handleSelectPodcast} />
+        {loading && <div className="loading-message">뉴스를 불러오는 중...</div>}
+        {error && <div className="error-message">{error}</div>}
+        {!loading && !error && <IssueMap podcasts={podcasts} onSelectPodcast={handleSelectPodcast} />}
       </div>
 
       {/* Player Screen */}
