@@ -7,9 +7,22 @@
 - 📱 모바일 최적화 UI
 - 🎧 이슈맵 기반 팟캐스트 탐색
 - 🎵 음악 앱 스타일 플레이어
-- 📊 인포그래픽 요약
+- 🎤 ElevenLabs TTS 음성 생성
+- 📊 인터랙티브 대본 (가사 스타일)
 
 ## 실행 방법
+
+### React 앱 (메인)
+
+```bash
+cd react-app
+npm install
+npm run dev
+```
+
+브라우저에서 http://localhost:5173 접속
+
+### 프로토타입 (HTML/JS)
 
 ```bash
 # 간단히 index.html을 브라우저에서 열기
@@ -18,6 +31,20 @@ python -m http.server 8000
 ```
 
 브라우저에서 http://localhost:8000 접속
+
+## 설정
+
+### ElevenLabs API 키 설정
+
+`react-app/src/config/elevenlabs.ts` 파일에서:
+
+```typescript
+export const ELEVENLABS_CONFIG = {
+  apiKey: 'your_api_key_here',
+  voiceId: 'your_voice_id',
+  // ...
+};
+```
 
 ## 향후 확장 계획
 
@@ -34,11 +61,19 @@ python -m http.server 8000
 - 자동 인포그래픽 생성
 - 스케줄링된 콘텐츠 업데이트
 
-## 파일 구조
+## 프로젝트 구조
 
 ```
-├── index.html      # 메인 HTML
-├── styles.css      # 스타일시트
-├── app.js          # 앱 로직
-└── data.js         # 더미 데이터 (추후 API로 대체)
+├── react-app/              # React + TypeScript 메인 앱
+│   ├── src/
+│   │   ├── components/     # React 컴포넌트
+│   │   ├── config/         # API 설정
+│   │   ├── data/           # 더미 데이터
+│   │   └── types/          # TypeScript 타입
+│   └── package.json
+├── backend/                # AWS Lambda 함수 (미사용)
+├── index.html              # 프로토타입 HTML
+├── styles.css              # 프로토타입 CSS
+├── app.js                  # 프로토타입 JS
+└── data.js                 # 프로토타입 데이터
 ```

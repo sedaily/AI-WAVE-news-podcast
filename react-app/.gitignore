@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# API Keys and Config
+src/config/elevenlabs.ts
+
+# Backend (AWS Lambda)
+../backend/

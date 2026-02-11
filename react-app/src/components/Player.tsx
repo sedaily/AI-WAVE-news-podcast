@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Podcast } from '../types/podcast';
+import { ELEVENLABS_CONFIG } from '../config/elevenlabs';
 
 interface PlayerProps {
   podcast: Podcast;
@@ -17,35 +18,91 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const lyricsRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!isActive) {
       setIsPlaying(false);
       setCurrentTime(0);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    } else if (!audioRef.current && !isGenerating) {
+      generateAudio();
     }
   }, [isActive]);
 
-  useEffect(() => {
-    let interval: number | undefined;
-
-    if (isPlaying && currentTime < podcast.duration) {
-      interval = window.setInterval(() => {
-        setCurrentTime((prev) => {
-          if (prev >= podcast.duration) {
-            setIsPlaying(false);
-            return prev;
-          }
-          return prev + 1;
-        });
-      }, 1000);
+  const generateAudio = async () => {
+    if (isGenerating || audioRef.current) return;
+    setIsGenerating(true);
+    
+    const fullText = podcast.transcript.map(s => s.text).join(' ');
+    
+    console.log('Generating audio with ElevenLabs...');
+    
+    try {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_CONFIG.voiceId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'xi-api-key': ELEVENLABS_CONFIG.apiKey
+        },
+        body: JSON.stringify({
+          text: fullText,
+          model_id: ELEVENLABS_CONFIG.model,
+          voice_settings: ELEVENLABS_CONFIG.voiceSettings
+        })
+      });
+      
+      if (response.ok) {
+        const audioBlob = await response.blob();
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        
+        const audio = new Audio(url);
+        audio.volume = 1.0; // 최대 볼륨 (0.0 ~ 1.0)
+        audioRef.current = audio;
+        
+        const handleTimeUpdate = () => {
+          setCurrentTime(Math.floor(audio.currentTime));
+        };
+        
+        const handleEnded = () => {
+          setIsPlaying(false);
+        };
+        
+        audio.addEventListener('timeupdate', handleTimeUpdate);
+        audio.addEventListener('ended', handleEnded);
+        
+        console.log('ElevenLabs audio ready:', url);
+      } else {
+        const errorText = await response.text();
+        console.error('ElevenLabs API error:', response.status, errorText);
+      }
+    } catch (error) {
+      console.error('Failed to generate audio:', error);
+    } finally {
+      setIsGenerating(false);
     }
+  };
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isPlaying, podcast.duration, currentTime]);
+  useEffect(() => {
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.play().catch(err => {
+        console.error('Play error:', err);
+        setIsPlaying(false);
+      });
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
 
   useEffect(() => {
     const activeLine = lyricsRef.current?.querySelector('.lyrics-line.active');
@@ -55,36 +112,50 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   }, [currentTime]);
 
   const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+    if (!audioRef.current) return;
+    
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().catch(err => {
+        console.error('Play error:', err);
+      });
+      setIsPlaying(true);
+    }
   };
 
   const skipBackward = () => {
-    setCurrentTime((prev) => Math.max(0, prev - 10));
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10);
+    }
   };
 
   const skipForward = () => {
-    setCurrentTime((prev) => Math.min(podcast.duration, prev + 10));
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.min(audioRef.current.duration || podcast.duration, audioRef.current.currentTime + 10);
+    }
   };
 
   const handleProgressClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!progressRef.current) return;
+      if (!progressRef.current || !audioRef.current) return;
       const rect = progressRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const percentage = Math.max(0, Math.min(1, x / rect.width));
-      setCurrentTime(Math.floor(percentage * podcast.duration));
+      audioRef.current.currentTime = percentage * (audioRef.current.duration || podcast.duration);
     },
     [podcast.duration]
   );
 
   const handleProgressDrag = useCallback(
     (e: MouseEvent | TouchEvent) => {
-      if (!isDragging || !progressRef.current) return;
+      if (!isDragging || !progressRef.current || !audioRef.current) return;
       const rect = progressRef.current.getBoundingClientRect();
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       const x = clientX - rect.left;
       const percentage = Math.max(0, Math.min(1, x / rect.width));
-      setCurrentTime(Math.floor(percentage * podcast.duration));
+      audioRef.current.currentTime = percentage * (audioRef.current.duration || podcast.duration);
     },
     [isDragging, podcast.duration]
   );
@@ -110,7 +181,9 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   }, [isDragging, handleProgressDrag, handleDragEnd]);
 
   const handleLyricClick = (startTime: number) => {
-    setCurrentTime(startTime);
+    if (audioRef.current) {
+      audioRef.current.currentTime = startTime;
+    }
   };
 
   const progress = (currentTime / podcast.duration) * 100;
