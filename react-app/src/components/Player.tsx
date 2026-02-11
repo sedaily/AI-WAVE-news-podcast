@@ -5,7 +5,6 @@ interface PlayerProps {
   podcast: Podcast;
   isActive: boolean;
   onClose: () => void;
-  onShowSummary: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -14,12 +13,12 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-function Player({ podcast, isActive, onClose, onShowSummary }: PlayerProps) {
+function Player({ podcast, isActive, onClose }: PlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
-  const transcriptRef = useRef<HTMLDivElement>(null);
+  const lyricsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isActive) {
@@ -49,9 +48,9 @@ function Player({ podcast, isActive, onClose, onShowSummary }: PlayerProps) {
   }, [isPlaying, podcast.duration, currentTime]);
 
   useEffect(() => {
-    const activeSegment = transcriptRef.current?.querySelector('.active');
-    if (activeSegment) {
-      activeSegment.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const activeLine = lyricsRef.current?.querySelector('.lyrics-line.active');
+    if (activeLine) {
+      activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [currentTime]);
 
@@ -110,82 +109,94 @@ function Player({ podcast, isActive, onClose, onShowSummary }: PlayerProps) {
     };
   }, [isDragging, handleProgressDrag, handleDragEnd]);
 
-  const handleClose = () => {
-    setIsPlaying(false);
-    onClose();
+  const handleLyricClick = (startTime: number) => {
+    setCurrentTime(startTime);
   };
 
   const progress = (currentTime / podcast.duration) * 100;
 
-  const getSegmentClass = (start: number, end: number): string => {
-    if (currentTime >= start && currentTime < end) return 'transcript-segment active';
-    if (currentTime >= end) return 'transcript-segment past';
-    return 'transcript-segment';
+  const getLyricClass = (start: number, end: number): string => {
+    if (currentTime >= start && currentTime < end) return 'lyrics-line active';
+    if (currentTime >= end) return 'lyrics-line past';
+    return 'lyrics-line';
   };
 
   const coverStyle = podcast.coverImage
-    ? { background: `url('${podcast.coverImage}') center/cover` }
-    : { background: podcast.coverColor };
+    ? { backgroundImage: `url('${podcast.coverImage}')` }
+    : { backgroundColor: podcast.coverColor };
 
   return (
-    <div className={`screen ${isActive ? 'active' : ''}`} id="player">
-      <div className="player-header">
-        <span></span>
-        <button className="close-btn" onClick={handleClose}>
-          ˅
-        </button>
-      </div>
-      <div className="player-container">
-        <div className="album-cover" style={coverStyle}></div>
-        <div className="track-info">
-          <h2>{podcast.title}</h2>
-          <p>#{podcast.keyword}</p>
+    <div className={`player-screen ${isActive ? 'active' : ''}`}>
+      <div className="player-handle" />
+      <div className="player-layout">
+        {/* Left: Visual */}
+        <div className="player-visual">
+          <div className="player-cover-wrapper">
+            <div className="player-cover" style={coverStyle} />
+            <div className="player-cover-glow" style={coverStyle} />
+          </div>
         </div>
-        <div className="transcript-container" ref={transcriptRef}>
-          <div className="transcript-content">
+
+        {/* Right: Content */}
+        <div className="player-content">
+          <div className="player-header">
+            <span>Now Playing</span>
+            <button className="player-close" onClick={onClose}>
+              ×
+            </button>
+          </div>
+
+          <div className="player-info">
+            <div className="player-keyword">#{podcast.keyword}</div>
+            <h2 className="player-title">{podcast.title}</h2>
+          </div>
+
+          {/* Lyrics Style Transcript */}
+          <div className="lyrics-container" ref={lyricsRef}>
             {podcast.transcript.map((segment, index) => (
-              <span
+              <p
                 key={index}
-                className={getSegmentClass(segment.start, segment.end)}
+                className={getLyricClass(segment.start, segment.end)}
+                onClick={() => handleLyricClick(segment.start)}
               >
                 {segment.text}
-              </span>
+              </p>
             ))}
           </div>
-        </div>
-        <div className="progress-bar">
-          <div
-            className="progress"
-            ref={progressRef}
-            onClick={handleProgressClick}
-            onMouseDown={() => setIsDragging(true)}
-            onTouchStart={() => setIsDragging(true)}
-            style={{ '--progress': `${progress}%` } as React.CSSProperties}
-          ></div>
-          <div className="time-info">
-            <span className="current-time">{formatTime(currentTime)}</span>
-            <span className="total-time">{formatTime(podcast.duration)}</span>
+
+          {/* Controls */}
+          <div className="player-controls-wrapper">
+            <div className="progress-container">
+              <div
+                className="progress-bar"
+                ref={progressRef}
+                onClick={handleProgressClick}
+                onMouseDown={() => setIsDragging(true)}
+                onTouchStart={() => setIsDragging(true)}
+              >
+                <div
+                  className="progress-fill"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="progress-time">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(podcast.duration)}</span>
+              </div>
+            </div>
+
+            <div className="controls">
+              <button className="control-btn" onClick={skipBackward}>
+                -10s
+              </button>
+              <button className="control-btn play-btn" onClick={togglePlay}>
+                {isPlaying ? '❚❚' : '▶'}
+              </button>
+              <button className="control-btn" onClick={skipForward}>
+                +10s
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="controls">
-          <button
-            className="control-btn hidden-btn"
-            style={{ opacity: 0, pointerEvents: 'none' }}
-          >
-            ⏮
-          </button>
-          <button className="control-btn skip-btn" onClick={skipBackward}>
-            ⏪
-          </button>
-          <button className="control-btn play-btn" onClick={togglePlay}>
-            {isPlaying ? '⏸' : '▶'}
-          </button>
-          <button className="control-btn skip-btn" onClick={skipForward}>
-            ⏩
-          </button>
-          <button className="control-btn summary-btn" onClick={onShowSummary}>
-            🤖
-          </button>
         </div>
       </div>
     </div>

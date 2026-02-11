@@ -1,92 +1,73 @@
 import type { PodcastKey } from '../types/podcast';
 import { podcastData, issueNodes } from '../data/podcastData';
-import type { IssueNode as IssueNodeType } from '../data/podcastData';
 
 interface IssueMapProps {
   onSelectPodcast: (key: PodcastKey) => void;
 }
 
+function formatDuration(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  return `${mins}분`;
+}
+
 function IssueMap({ onSelectPodcast }: IssueMapProps) {
+  // Generate connection lines between nodes
+  const connections = [
+    { from: 0, to: 1 },
+    { from: 0, to: 2 },
+    { from: 1, to: 3 },
+    { from: 2, to: 3 },
+  ];
+
   return (
-    <div className="screen active" id="issueMap">
-      <header>
-        <h1>🎧 이슈캐스트</h1>
-        <p className="subtitle">오늘의 핫이슈를 팟캐스트로</p>
-      </header>
-      <div className="issue-map-container">
-        <div className="issue-map-header">
-          <h2>오늘의 이슈 맵</h2>
-          <p>하루 동안 가장 중요한 이슈들을 선정해서 보여드려요!</p>
-        </div>
-        <div className="issue-network">
-          <NetworkLines nodes={issueNodes} />
-          {issueNodes.map((node) => (
-            <IssueNode
-              key={node.key}
-              node={node}
-              keyword={podcastData[node.key].keyword}
-              onClick={() => onSelectPodcast(node.key)}
-            />
-          ))}
-        </div>
+    <section className="issue-map-section">
+      <div className="issue-map-title">
+        <h1>오늘의 핵심 이슈</h1>
+        <p>클릭하여 팟캐스트 듣기</p>
       </div>
-    </div>
-  );
-}
 
-interface NetworkLinesProps {
-  nodes: IssueNodeType[];
-}
+      <div className="issue-network">
+        {/* SVG Connection Lines */}
+        <svg className="network-lines">
+          {connections.map((conn, index) => {
+            const fromNode = issueNodes[conn.from];
+            const toNode = issueNodes[conn.to];
+            return (
+              <line
+                key={index}
+                x1={`${fromNode.x}%`}
+                y1={`${fromNode.y}%`}
+                x2={`${toNode.x}%`}
+                y2={`${toNode.y}%`}
+              />
+            );
+          })}
+        </svg>
 
-function NetworkLines({ nodes }: NetworkLinesProps) {
-  const lines: { x1: string; y1: string; x2: string; y2: string }[] = [];
-
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      lines.push({
-        x1: `${nodes[i].x}%`,
-        y1: `${nodes[i].y}%`,
-        x2: `${nodes[j].x}%`,
-        y2: `${nodes[j].y}%`,
-      });
-    }
-  }
-
-  return (
-    <svg className="network-lines">
-      {lines.map((line, index) => (
-        <line
-          key={index}
-          x1={line.x1}
-          y1={line.y1}
-          x2={line.x2}
-          y2={line.y2}
-        />
-      ))}
-    </svg>
-  );
-}
-
-interface IssueNodeProps {
-  node: IssueNodeType;
-  keyword: string;
-  onClick: () => void;
-}
-
-function IssueNode({ node, keyword, onClick }: IssueNodeProps) {
-  return (
-    <div
-      className={`issue-node ${node.size}`}
-      style={{
-        left: `${node.x}%`,
-        top: `${node.y}%`,
-        transform: 'translate(-50%, -50%)',
-        background: node.color,
-      }}
-      onClick={onClick}
-    >
-      {keyword}
-    </div>
+        {/* Issue Nodes */}
+        {issueNodes.map((node) => {
+          const podcast = podcastData[node.key];
+          return (
+            <div
+              key={node.key}
+              className={`issue-node ${node.size}`}
+              style={{
+                left: `${node.x}%`,
+                top: `${node.y}%`,
+                transform: 'translate(-50%, -50%)',
+                background: `linear-gradient(135deg, ${node.color}40, ${node.color}20)`,
+              }}
+              onClick={() => onSelectPodcast(node.key)}
+            >
+              <div className="issue-node-inner">
+                <span className="issue-node-keyword">{podcast.keyword}</span>
+                <span className="issue-node-duration">{formatDuration(podcast.duration)}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
