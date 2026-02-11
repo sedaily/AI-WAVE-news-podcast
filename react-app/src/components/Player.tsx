@@ -18,7 +18,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [_audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const lyricsRef = useRef<HTMLDivElement>(null);
@@ -259,16 +259,17 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
             </div>
 
             <div className="controls">
-              <button className="control-btn" onClick={skipBackward}>
+              <button className="control-btn" onClick={skipBackward} disabled={isGenerating}>
                 -10s
               </button>
-              <button className="control-btn play-btn" onClick={togglePlay}>
-                {isPlaying ? '❚❚' : '▶'}
+              <button className="control-btn play-btn" onClick={togglePlay} disabled={isGenerating}>
+                {isGenerating ? '...' : isPlaying ? '❚❚' : '▶'}
               </button>
-              <button className="control-btn" onClick={skipForward}>
+              <button className="control-btn" onClick={skipForward} disabled={isGenerating}>
                 +10s
               </button>
             </div>
+            {isGenerating && <p style={{ textAlign: 'center', color: '#ff6b35', marginTop: '12px' }}>음성 생성 중...</p>}
           </div>
         </div>
       </div>
