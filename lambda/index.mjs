@@ -203,6 +203,8 @@ async function generateAudio(script, id) {
 
     // S3에 업로드
     const key = `podcasts/${id}.mp3`;
+    const audioUrl = `https://sedaily-news-xml-storage.s3.amazonaws.com/${key}`;
+    
     await s3.send(new PutObjectCommand({
       Bucket: 'sedaily-news-xml-storage',
       Key: key,
@@ -211,14 +213,19 @@ async function generateAudio(script, id) {
     }));
     
     console.log(`Audio uploaded to S3: ${key}`);
+    console.log(`Audio URL: ${audioUrl}`);
 
     // Duration 계산 (대략적으로 한국어 1분에 약 300자)
     const estimatedDuration = Math.floor(script.length / 5);
 
-    return {
-      audioUrl: `https://sedaily-news-xml-storage.s3.amazonaws.com/${key}`,
+    const result = {
+      audioUrl: audioUrl,
       duration: estimatedDuration
     };
+    
+    console.log(`Returning audio result:`, JSON.stringify(result));
+    
+    return result;
   } catch (error) {
     console.error('Error generating audio with Polly:', error);
     console.error('Error details:', JSON.stringify(error, null, 2));
@@ -274,10 +281,12 @@ export const handler = async ()=> {
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         const audio=await generateAudio(script,id);
-        console.log(`Audio result:`, audio);
+        console.log(`Audio result for ${id}:`, JSON.stringify(audio));
         
         if (!audio.audioUrl) {
-          console.error(`Failed to generate audio for podcast ${i}, but continuing...`);
+          console.error(`WARNING: Empty audioUrl for podcast ${i} (${c.keyword})`);
+        } else {
+          console.log(`SUCCESS: Audio URL set for ${c.keyword}: ${audio.audioUrl}`);
         }
         
         // 오디오 생성 후 2초 대기
