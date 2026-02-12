@@ -149,3 +149,54 @@ const podcastData = {
         ]
     }
 };
+
+// S3에서 실제 팟캐스트 데이터 로드
+async function loadPodcastDataFromS3() {
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const S3_ENDPOINT = 'https://sedaily-news-xml-storage.s3.amazonaws.com/podcasts';
+  
+  try {
+    console.log(`Loading podcast data for ${today}...`);
+    const response = await fetch(`${S3_ENDPOINT}/data-${today}.json`);
+    
+    if (!response.ok) {
+      console.log('Today\'s data not found, using demo data');
+      return;
+    }
+    
+    const data = await response.json();
+    console.log('Loaded data from S3:', data);
+    
+    // 팟캐스트 데이터 업데이트
+    Object.keys(data).forEach(key => {
+      if (key !== '_connections') {
+        podcastData[key] = data[key];
+      }
+    });
+    
+    // 연결 정보 업데이트
+    if (data._connections) {
+      podcastData._connections = data._connections;
+    }
+    
+    console.log('Updated podcast data:', Object.keys(podcastData).filter(k => k !== '_connections'));
+    
+    // 이슈맵 다시 렌더링
+    if (typeof renderIssueMap === 'function') {
+      const container = document.getElementById('issueNetwork');
+      if (container) {
+        container.innerHTML = '';
+        renderIssueMap();
+      }
+    }
+    
+  } catch (error) {
+    console.error('Failed to load podcast data from S3:', error);
+    console.log('Using demo data');
+  }
+}
+
+// 페이지 로드 시 S3 데이터 가져오기
+if (typeof window !== 'undefined') {
+  loadPodcastDataFromS3();
+}

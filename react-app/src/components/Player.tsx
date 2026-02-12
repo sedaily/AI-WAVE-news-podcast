@@ -32,63 +32,38 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
       }
-    } else if (!audioRef.current && !isGenerating) {
-      generateAudio();
-    }
-  }, [isActive]);
-
-  const generateAudio = async () => {
-    if (isGenerating || audioRef.current) return;
-    setIsGenerating(true);
-    
-    const fullText = podcast.transcript.map(s => s.text).join(' ');
-    
-    console.log('Generating audio with ElevenLabs...');
-    
-    try {
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_CONFIG.voiceId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': ELEVENLABS_CONFIG.apiKey
-        },
-        body: JSON.stringify({
-          text: fullText,
-          model_id: ELEVENLABS_CONFIG.model,
-          voice_settings: ELEVENLABS_CONFIG.voiceSettings
-        })
-      });
-      
-      if (response.ok) {
-        const audioBlob = await response.blob();
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
-        
-        const audio = new Audio(url);
-        audio.volume = 1.0; // 최대 볼륨 (0.0 ~ 1.0)
-        audioRef.current = audio;
-        
-        const handleTimeUpdate = () => {
-          setCurrentTime(Math.floor(audio.currentTime));
-        };
-        
-        const handleEnded = () => {
-          setIsPlaying(false);
-        };
-        
-        audio.addEventListener('timeupdate', handleTimeUpdate);
-        audio.addEventListener('ended', handleEnded);
-        
-        console.log('ElevenLabs audio ready:', url);
+    } else if (!audioRef.current) {
+      // S3에 저장된 오디오 URL 사용
+      if (podcast.audioUrl) {
+        loadAudioFromUrl(podcast.audioUrl);
       } else {
-        const errorText = await response.text();
-        console.error('ElevenLabs API error:', response.status, errorText);
+        console.log('No audio URL available');
       }
-    } catch (error) {
-      console.error('Failed to generate audio:', error);
-    } finally {
-      setIsGenerating(false);
     }
+  }, [isActive, podcast.audioUrl]);
+
+  const loadAudioFromUrl = (url: string) => {
+    if (audioRef.current) return;
+    
+    console.log('Loading audio from S3:', url);
+    setAudioUrl(url);
+    
+    const audio = new Audio(url);
+    audio.volume = 1.0;
+    audioRef.current = audio;
+    
+    const handleTimeUpdate = () => {
+      setCurrentTime(Math.floor(audio.currentTime));
+    };
+    
+    const handleEnded = () => {
+      setIsPlaying(false);
+    };
+    
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    
+    console.log('Audio ready:', url);
   };
 
   useEffect(() => {
@@ -259,17 +234,17 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
             </div>
 
             <div className="controls">
-              <button className="control-btn" onClick={skipBackward} disabled={isGenerating}>
+              <button className="control-btn" onClick={skipBackward} disabled={!audioRef.current}>
                 -10s
               </button>
-              <button className="control-btn play-btn" onClick={togglePlay} disabled={isGenerating}>
-                {isGenerating ? '...' : isPlaying ? '❚❚' : '▶'}
+              <button className="control-btn play-btn" onClick={togglePlay} disabled={!audioRef.current}>
+                {!audioRef.current ? '...' : isPlaying ? '❚❚' : '▶'}
               </button>
-              <button className="control-btn" onClick={skipForward} disabled={isGenerating}>
+              <button className="control-btn" onClick={skipForward} disabled={!audioRef.current}>
                 +10s
               </button>
             </div>
-            {isGenerating && <p style={{ textAlign: 'center', color: '#ff6b35', marginTop: '12px' }}>음성 생성 중...</p>}
+            {!podcast.audioUrl && <p style={{ textAlign: 'center', color: '#ff6b35', marginTop: '12px' }}>오디오가 아직 생성되지 않았습니다</p>}
           </div>
         </div>
       </div>

@@ -21,15 +21,15 @@ const nodePositions = [
 const nodeColors = ['#6b9b8e', '#8b7ba8', '#7ba3c0', '#7cb89d'];
 
 function IssueMap({ podcasts, onSelectPodcast }: IssueMapProps) {
-  // Generate connection lines between nodes
-  const connections = podcasts.length >= 4 ? [
-    { from: 0, to: 1 },
-    { from: 0, to: 2 },
-    { from: 1, to: 3 },
-    { from: 2, to: 3 },
-  ] : podcasts.length >= 2 ? [
-    { from: 0, to: 1 },
-  ] : [];
+  // Generate connection lines between all nodes
+  const connections: { from: number; to: number }[] = [];
+  
+  // 모든 노드 간 연결선 생성
+  for (let i = 0; i < Math.min(podcasts.length, 4); i++) {
+    for (let j = i + 1; j < Math.min(podcasts.length, 4); j++) {
+      connections.push({ from: i, to: j });
+    }
+  }
 
   return (
     <section className="issue-map-section">
@@ -46,11 +46,12 @@ function IssueMap({ podcasts, onSelectPodcast }: IssueMapProps) {
             const toNode = nodePositions[conn.to];
             return (
               <line
-                key={index}
+                key={`${conn.from}-${conn.to}`}
                 x1={`${fromNode.x}%`}
                 y1={`${fromNode.y}%`}
                 x2={`${toNode.x}%`}
                 y2={`${toNode.y}%`}
+                strokeWidth="2"
               />
             );
           })}

@@ -1,4 +1,6 @@
-const API_URL = 'https://or4di2zz5sefbmpy5niafkm6bu0uamot.lambda-url.us-east-1.on.aws/';
+const API_URL = import.meta.env.DEV 
+  ? '/api/' 
+  : 'https://or4di2zz5sefbmpy5niafkm6bu0uamot.lambda-url.us-east-1.on.aws/';
 
 export interface NewsArticle {
   id: string;
