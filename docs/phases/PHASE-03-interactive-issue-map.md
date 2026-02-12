@@ -3,14 +3,16 @@
 **Status**: Completed
 **Date**: 2026-02-11
 **Priority**: High
-**Category**: UI/UX Feature
+**Category**: UI/UX Feature, backend logic develop
 
 ---
 
 ## Overview
 
-이슈맵을 정적 레이아웃에서 인터랙티브한 네트워크 맵으로 전환. 사용자가 노드를 드래그하여 위치를 조정하고, 클릭하여 팟캐스트를 선택할 수 있는 직관적인 탐색 경험 제공.
+- 이슈맵을 정적 레이아웃에서 인터랙티브한 네트워크 맵으로 전환. 사용자가 노드를 드래그하여 위치를 조정하고, 클릭하여 팟캐스트를 선택할 수 있는 직관적인 탐색 경험 제공.
+- react app --- AWS 연동
 
+  
 ---
 
 ## Problem
