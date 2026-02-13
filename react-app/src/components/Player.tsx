@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Podcast } from '../types/podcast';
-import { ELEVENLABS_CONFIG } from '../config/elevenlabs';
 
 interface PlayerProps {
   podcast: Podcast;
@@ -19,7 +18,6 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [_audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const lyricsRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -41,6 +39,21 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
       }
     }
   }, [isActive, podcast.audioUrl]);
+
+  // 컴포넌트 언마운트 또는 팟캐스트 변경 시 오디오 정리
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setAudioUrl(null);
+    };
+  }, [podcast.audioUrl]);
 
   const loadAudioFromUrl = (url: string) => {
     if (audioRef.current) return;
@@ -171,7 +184,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
 
   const coverStyle = podcast.coverImage
     ? { backgroundImage: `url('${podcast.coverImage}')` }
-    : { backgroundColor: podcast.coverColor };
+    : { background: 'linear-gradient(135deg, #ff6b35, #4ecdc4)' };
 
   return (
     <div className={`player-screen ${isActive ? 'active' : ''}`}>

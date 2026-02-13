@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { EconomyPodcast } from '../hooks/useEconomyNews';
 
 interface IssueMapProps {
@@ -21,8 +21,8 @@ function formatDuration(seconds: number): string {
 const initialNodePositions: NodePosition[] = [
   { x: 30, y: 35, size: 'large' },
   { x: 70, y: 40, size: 'large' },
-  { x: 25, y: 75, size: 'medium' },
-  { x: 75, y: 80, size: 'medium' },
+  { x: 25, y: 75, size: 'large' },
+  { x: 75, y: 80, size: 'large' },
 ];
 
 const nodeColors = ['#6b9b8e', '#8b7ba8', '#7ba3c0', '#7cb89d'];

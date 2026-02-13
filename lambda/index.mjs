@@ -1,10 +1,12 @@
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { PollyClient, SynthesizeSpeechCommand } from '@aws-sdk/client-polly';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { XMLParser } from 'fast-xml-parser';
 import Anthropic from '@anthropic-ai/sdk';
 
 const s3 = new S3Client({ region: 'us-east-1' });
 const polly = new PollyClient({ region: 'us-east-1' });
+const bedrock = new BedrockRuntimeClient({ region: 'us-east-1' });
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -144,6 +146,70 @@ ${articlesText}
   return res.content[0].text.trim();
 }
 
+async function generateThumbnail(cluster, id) {
+  try {
+    const promptGen = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 150,
+      messages: [{
+        role: 'user',
+        content: `Create a short English image prompt for an economic podcast thumbnail.
+
+Topic: ${cluster.keyword}
+Summary: ${cluster.summary}
+
+Requirements:
+- Abstract modern business illustration
+- Financial icons, charts, graphs
+- Clean minimal style
+- No text
+- Max 40 words in English
+
+Output only the prompt.`
+      }]
+    });
+
+    const imagePrompt = promptGen.content[0].text.trim();
+    console.log(`Image prompt: ${imagePrompt}`);
+
+    const payload = {
+      text_prompts: [{ text: imagePrompt }],
+      cfg_scale: 7,
+      steps: 30,
+      seed: Math.floor(Math.random() * 1000000),
+      width: 512,
+      height: 512
+    };
+
+    const command = new InvokeModelCommand({
+      modelId: 'stability.stable-diffusion-xl-v1',
+      contentType: 'application/json',
+      accept: 'application/json',
+      body: JSON.stringify(payload)
+    });
+
+    const response = await bedrock.send(command);
+    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+    const imageBase64 = responseBody.artifacts[0].base64;
+    const imageBuffer = Buffer.from(imageBase64, 'base64');
+
+    const key = `podcasts/thumbnails/${id}.png`;
+    await s3.send(new PutObjectCommand({
+      Bucket: 'sedaily-news-xml-storage',
+      Key: key,
+      Body: imageBuffer,
+      ContentType: 'image/png'
+    }));
+
+    const thumbnailUrl = `https://sedaily-news-xml-storage.s3.amazonaws.com/${key}`;
+    console.log(`Thumbnail: ${thumbnailUrl}`);
+    return thumbnailUrl;
+  } catch (error) {
+    console.error('Thumbnail error:', error);
+    return '';
+  }
+}
+
 async function generateAudio(script, id) {
   try {
     // Polly는 최대 3000자까지 처리 가능
@@ -238,36 +304,62 @@ async function generateAudio(script, id) {
   }
 }
 
-export const handler = async ()=> {
-  const today=new Date().toISOString().slice(0,10).replace(/-/g,'');
-
+async function fetchArticles(date) {
   try {
-    const xml=await s3.send(new GetObjectCommand({
-      Bucket:'sedaily-news-xml-storage',
-      Key:`daily-xml/${today}.xml`
+    const xml = await s3.send(new GetObjectCommand({
+      Bucket: 'sedaily-news-xml-storage',
+      Key: `daily-xml/${date}.xml`
     }));
 
-    const text=await xml.Body.transformToString();
-    const parser=new XMLParser({ignoreAttributes:false,attributeNamePrefix:'@_'});
-    const items=parser.parse(text).items?.item||[];
+    const text = await xml.Body.transformToString();
+    const parser = new XMLParser({ignoreAttributes: false, attributeNamePrefix: '@_'});
+    const items = parser.parse(text).items?.item || [];
 
-    const articles=items
-      .filter(i=>ECONOMY_CODES.includes(i.category?.['@_code']))
-      .slice(0,10)
-      .map((i,idx)=>({
-        id:`eco-${idx}`,
-        title:i.title||'',
-        content:i.content||'',
-        image:i.image?.['@_href']||''
+    return items
+      .filter(i => ECONOMY_CODES.includes(i.category?.['@_code']))
+      .map((i, idx) => ({
+        id: `eco-${date}-${idx}`,
+        title: i.title || '',
+        content: i.content || '',
+        image: i.image?.['@_href'] || '',
+        date: date
       }));
+  } catch (error) {
+    console.log(`No articles found for ${date}`);
+    return [];
+  }
+}
+
+export const handler = async ()=> {
+  const today = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10).replace(/-/g,'');
+
+  try {
+    // 오늘 기사 가져오기
+    let articles = await fetchArticles(today);
+    console.log(`Today's articles: ${articles.length}`);
+
+    // 오늘 기사가 5개 미만이면 어제 기사 추가
+    if (articles.length < 5) {
+      const yesterdayArticles = await fetchArticles(yesterday);
+      console.log(`Yesterday's articles: ${yesterdayArticles.length}`);
+      
+      const needed = 10 - articles.length;
+      articles = [...articles, ...yesterdayArticles.slice(0, needed)];
+      console.log(`Combined articles: ${articles.length}`);
+    } else {
+      articles = articles.slice(0, 10);
+    }
 
     const clusters=await extractKeywords(articles);
     const grouped=clusterArticles(articles,clusters);
 
     const podcasts=[];
     
-    // 순차 처리 (rate limit 방지)
-    for (let i = 0; i < Math.min(grouped.length, 4); i++) { // 최대 4개로 제한
+    // 최소 4개, 최대 5개 팟캐스트 생성
+    const targetCount = Math.min(Math.max(grouped.length, 4), 5);
+    
+    for (let i = 0; i < targetCount; i++) {
       const c = grouped[i];
       try {
         const id=`podcast-${today}-${i}`;
@@ -277,7 +369,10 @@ export const handler = async ()=> {
         const script=await generateScript(c);
         console.log(`Script generated: ${script.length} characters`);
         
-        // 대본 생성 후 1초 대기
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const thumbnail = await generateThumbnail(c, id);
+        
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         const audio=await generateAudio(script,id);
@@ -289,10 +384,9 @@ export const handler = async ()=> {
           console.log(`SUCCESS: Audio URL set for ${c.keyword}: ${audio.audioUrl}`);
         }
         
-        // 오디오 생성 후 2초 대기
         await new Promise(resolve => setTimeout(resolve, 2000));
         
-        podcasts.push({...c,id,script,...audio});
+        podcasts.push({...c,id,script,thumbnail,...audio});
       } catch (error) {
         console.error(`Error processing podcast ${i}:`, error);
         console.error(`Error stack:`, error.stack);
@@ -302,6 +396,8 @@ export const handler = async ()=> {
     }
 
     const colors=['#6b9b8e','#8b7ba8','#7ba3c0','#7cb89d','#c08b7b'];
+
+    console.log(`Generated ${podcasts.length} podcasts`);
 
     // 키워드 간 연관도 계산
     const connections = [];
@@ -358,7 +454,7 @@ export const handler = async ()=> {
         duration:p.duration,
         audioUrl:p.audioUrl,
         coverColor:colors[i%colors.length],
-        coverImage:p.articles[0]?.image||'',
+        coverImage:p.thumbnail||'',
         relatedKeywords:p.relatedKeywords||[],
         summary:{
           keyPoints:p.articles.slice(0,3).map(a=>a.title),
