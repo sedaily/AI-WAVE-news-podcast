@@ -151,7 +151,7 @@ function History({ onClose: _onClose }: HistoryProps) {
               <div className="activity-item">
                 <span className="activity-icon">📝</span>
                 <span>
-                  퀴즈: <span className="quiz-correct-highlight">{selectedActivity.quizCorrect}</span>/{selectedActivity.quizTotal}문제
+                  퀴즈: <span className="quiz-correct-highlight">{selectedActivity.quizCorrect}</span> 문제
                 </span>
               </div>
             )}
