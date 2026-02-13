@@ -52,13 +52,13 @@ function App() {
               className={`nav-link ${viewMode === 'quiz' ? 'active' : ''}`}
               onClick={() => setViewMode('quiz')}
             >
-              경제 Quiz
+              10초 리마인드
             </span>
             <span 
               className={`nav-link ${viewMode === 'history' ? 'active' : ''}`}
               onClick={() => setViewMode('history')}
             >
-              히스토리
+              함께한 날들
             </span>
           </nav>
         </header>

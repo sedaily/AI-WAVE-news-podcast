@@ -67,7 +67,7 @@ export function saveQuizResult(correct: number, total: number): void {
 export function calculateStreak(): StreakInfo {
   const history = getHistory();
   if (history.length === 0) {
-    return { currentStreak: 0, longestStreak: 0, totalDays: 0 };
+    return { currentStreak: 0, longestStreak: 0, totalDays: 0, totalCorrectAnswers: 0 };
   }
 
   // 날짜순 정렬
@@ -112,10 +112,16 @@ export function calculateStreak(): StreakInfo {
   }
   longestStreak = Math.max(longestStreak, tempStreak);
 
+  // 총 맞힌 문제 수 계산
+  const totalCorrectAnswers = history.reduce((sum, activity) => {
+    return sum + (activity.quizCorrect || 0);
+  }, 0);
+
   return {
     currentStreak,
     longestStreak,
-    totalDays: history.length
+    totalDays: history.length,
+    totalCorrectAnswers
   };
 }
 

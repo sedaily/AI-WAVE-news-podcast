@@ -10,4 +10,5 @@ export interface StreakInfo {
   currentStreak: number;
   longestStreak: number;
   totalDays: number;
+  totalCorrectAnswers: number;
 }

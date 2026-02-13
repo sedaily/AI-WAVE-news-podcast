@@ -6,7 +6,7 @@ interface HistoryProps {
   onClose: () => void;
 }
 
-function History({ onClose }: HistoryProps) {
+function History({ onClose: _onClose }: HistoryProps) {
   const [history, setHistory] = useState<DailyActivity[]>([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedActivity, setSelectedActivity] = useState<DailyActivity | null>(null);
@@ -69,31 +69,30 @@ function History({ onClose }: HistoryProps) {
   return (
     <div className="history-container">
       <div className="history-header">
-        <h2>히스토리</h2>
-        <button className="history-close-btn" onClick={onClose}>✕</button>
+        <h2>함께한 날들</h2>
       </div>
 
       {/* Streak 정보 */}
       <div className="streak-section">
         <div className="streak-card">
-          <div className="streak-icon">🔥</div>
+          <div className="streak-icon">🌿</div>
           <div className="streak-info">
             <div className="streak-number">{streak.currentStreak}</div>
-            <div className="streak-label">연속 일수</div>
+            <div className="streak-label">이번 리듬</div>
           </div>
         </div>
         <div className="streak-card">
-          <div className="streak-icon">🏆</div>
+          <div className="streak-icon">☁️</div>
           <div className="streak-info">
-            <div className="streak-number">{streak.longestStreak}</div>
-            <div className="streak-label">최장 기록</div>
+            <div className="streak-number">{streak.totalDays}</div>
+            <div className="streak-label">함께한 날</div>
           </div>
         </div>
         <div className="streak-card">
           <div className="streak-icon">📚</div>
           <div className="streak-info">
-            <div className="streak-number">{streak.totalDays}</div>
-            <div className="streak-label">총 활동일</div>
+            <div className="streak-number">{streak.totalCorrectAnswers}</div>
+            <div className="streak-label">맞힌 문제</div>
           </div>
         </div>
       </div>
@@ -146,14 +145,13 @@ function History({ onClose }: HistoryProps) {
           <div className="activity-detail-content">
             <div className="activity-item">
               <span className="activity-icon">📰</span>
-              <span>뉴스 읽기: {selectedActivity.newsRead ? '완료' : '미완료'}</span>
+              <span>뉴스 읽기: {selectedActivity.newsRead ? <span className="quiz-correct-highlight">완료</span> : '미완료'}</span>
             </div>
-            {selectedActivity.quizScore !== undefined && (
+            {selectedActivity.quizCorrect !== undefined && selectedActivity.quizTotal !== undefined && (
               <div className="activity-item">
                 <span className="activity-icon">📝</span>
                 <span>
-                  퀴즈: {selectedActivity.quizCorrect}/{selectedActivity.quizTotal} 
-                  ({selectedActivity.quizScore}점)
+                  퀴즈: <span className="quiz-correct-highlight">{selectedActivity.quizCorrect}</span>/{selectedActivity.quizTotal}문제
                 </span>
               </div>
             )}

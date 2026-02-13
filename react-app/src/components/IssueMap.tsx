@@ -109,8 +109,8 @@ function IssueMap({ podcasts, onSelectPodcast }: IssueMapProps) {
   return (
     <section className="issue-map-section">
       <div className="issue-map-title">
-        <h1>오늘의 경제 뉴스</h1>
-        <p>클릭하여 팟캐스트 듣기 • 드래그하여 위치 조정</p>
+        <h1>오늘의 경제<br />가볍게 들어보세요</h1>
+        <p>클릭하여 팟캐스트 듣기</p>
       </div>
 
       <div className="issue-network" ref={containerRef}>
@@ -158,6 +158,8 @@ function IssueMap({ podcasts, onSelectPodcast }: IssueMapProps) {
             </div>
           );
         })}
+        
+        <p className="drag-hint">드래그하여 위치 조정</p>
       </div>
     </section>
   );

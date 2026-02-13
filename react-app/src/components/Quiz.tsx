@@ -63,24 +63,15 @@ function Quiz({ onClose }: QuizProps) {
   };
 
   const correctCount = results.filter(r => r.isCorrect).length;
-  const score = Math.round((correctCount / questions.length) * 100);
+//    const score = Math.round((correctCount / questions.length) * 100);
 
   if (isFinished) {
     return (
       <div className="quiz-container">
-        <div className="quiz-header">
-          <h2>경제용어 퀴즈</h2>
-          <button className="quiz-close-btn" onClick={onClose}>✕</button>
-        </div>
-
         <div className="quiz-result">
           <div className="result-score">
-            <div className="score-circle">
-              <span className="score-number">{score}</span>
-              <span className="score-label">점</span>
-            </div>
             <h3>퀴즈 완료!</h3>
-            <p>{correctCount}개 / {questions.length}개 정답</p>
+            <p><span className="quiz-correct-highlight">{correctCount}</span> / {questions.length}문제 정답</p>
           </div>
 
           <div className="result-summary">
@@ -96,8 +87,8 @@ function Quiz({ onClose }: QuizProps) {
           </div>
 
           <div className="result-actions">
-            <button className="btn-secondary" onClick={handleRestart}>다시 풀기</button>
-            <button className="btn-primary" onClick={onClose}>닫기</button>
+            <button className="btn-secondary btn-compact" onClick={handleRestart}>다시 풀기</button>
+            <button className="btn-secondary btn-compact" onClick={onClose}>닫기</button>
           </div>
         </div>
       </div>
@@ -108,7 +99,6 @@ function Quiz({ onClose }: QuizProps) {
     <div className="quiz-container">
       <div className="quiz-header">
         <h2>경제용어 퀴즈</h2>
-        <button className="quiz-close-btn" onClick={onClose}>✕</button>
       </div>
 
       <div className="quiz-progress">
