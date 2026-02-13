@@ -2,10 +2,11 @@ import { useState } from 'react';
 import IssueMap from './components/IssueMap';
 import Player from './components/Player';
 import Quiz from './components/Quiz';
+import History from './components/History';
 import { useEconomyNews, type EconomyPodcast } from './hooks/useEconomyNews';
 import './App.css';
 
-type ViewMode = 'news' | 'quiz';
+type ViewMode = 'news' | 'quiz' | 'history';
 
 function App() {
   const { podcasts, loading, error } = useEconomyNews();
@@ -21,6 +22,10 @@ function App() {
   };
 
   const handleCloseQuiz = () => {
+    setViewMode('news');
+  };
+
+  const handleCloseHistory = () => {
     setViewMode('news');
   };
 
@@ -49,7 +54,12 @@ function App() {
             >
               경제 Quiz
             </span>
-            <span className="nav-link">아카이브</span>
+            <span 
+              className={`nav-link ${viewMode === 'history' ? 'active' : ''}`}
+              onClick={() => setViewMode('history')}
+            >
+              히스토리
+            </span>
           </nav>
         </header>
 
@@ -62,6 +72,8 @@ function App() {
         )}
         
         {viewMode === 'quiz' && <Quiz onClose={handleCloseQuiz} />}
+        
+        {viewMode === 'history' && <History onClose={handleCloseHistory} />}
       </div>
 
       {/* Player Screen */}

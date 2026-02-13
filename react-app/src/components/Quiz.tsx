@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { QuizQuestion, QuizResult } from '../types/quiz';
 import { getTodayQuiz } from '../data/quizData';
+import { saveQuizResult } from '../utils/historyStorage';
 
 interface QuizProps {
   onClose: () => void;
@@ -40,6 +41,14 @@ function Quiz({ onClose }: QuizProps) {
       setSelectedAnswer(null);
       setShowExplanation(false);
     } else {
+      // 퀴즈 완료 시 결과 저장
+      const correctCount = [...results, {
+        questionId: currentQuestion.id,
+        isCorrect: selectedAnswer === currentQuestion.correctAnswer,
+        selectedAnswer: selectedAnswer!
+      }].filter(r => r.isCorrect).length;
+      
+      saveQuizResult(correctCount, questions.length);
       setIsFinished(true);
     }
   };

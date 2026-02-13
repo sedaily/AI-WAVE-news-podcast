@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Podcast } from '../types/podcast';
+import { markNewsRead } from '../utils/historyStorage';
 
 interface PlayerProps {
   podcast: Podcast;
@@ -110,6 +111,8 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
         console.error('Play error:', err);
       });
       setIsPlaying(true);
+      // 뉴스를 재생하면 읽음으로 기록
+      markNewsRead();
     }
   };
 
