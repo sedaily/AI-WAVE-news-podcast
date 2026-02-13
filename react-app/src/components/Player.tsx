@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import type { Podcast } from '../types/podcast';
 import { markNewsRead } from '../utils/historyStorage';
+import { updateKeywordScores } from '../utils/userPreferences';
 
 interface PlayerProps {
   podcast: Podcast;
@@ -19,6 +20,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [_audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [hasScored, setHasScored] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const lyricsRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -27,6 +29,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
     if (!isActive) {
       setIsPlaying(false);
       setCurrentTime(0);
+      setHasScored(false);
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -53,6 +56,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
       setIsPlaying(false);
       setCurrentTime(0);
       setAudioUrl(null);
+      setHasScored(false);
     };
   }, [podcast.audioUrl]);
 
@@ -72,6 +76,11 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
     
     const handleEnded = () => {
       setIsPlaying(false);
+      // 완료 시 점수 부여
+      if (podcast.relatedKeywords && podcast.relatedKeywords.length > 0) {
+        updateKeywordScores(podcast.relatedKeywords, true);
+        setHasScored(true);
+      }
     };
     
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -103,6 +112,10 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   const togglePlay = () => {
     if (!audioRef.current) return;
     
+    console.log('Toggle play, podcast:', podcast.keyword);
+    console.log('Related keywords:', podcast.relatedKeywords);
+    console.log('Has scored:', hasScored);
+    
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
@@ -113,6 +126,15 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
       setIsPlaying(true);
       // 뉴스를 재생하면 읽음으로 기록
       markNewsRead();
+      // 첫 재생 시에만 부분 점수 부여
+      if (!hasScored && podcast.relatedKeywords && podcast.relatedKeywords.length > 0) {
+        console.log('Updating keyword scores:', podcast.relatedKeywords);
+        updateKeywordScores(podcast.relatedKeywords, false);
+        setHasScored(true);
+        console.log('Scores updated, localStorage:', localStorage.getItem('podcast_user_preferences'));
+      } else {
+        console.log('Skipping score update - hasScored:', hasScored, 'keywords:', podcast.relatedKeywords);
+      }
     }
   };
 

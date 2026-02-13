@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import IssueMap from './components/IssueMap';
 import Player from './components/Player';
 import Quiz from './components/Quiz';
 import History from './components/History';
+import WelcomePopup from './components/WelcomePopup';
 import { useEconomyNews, type EconomyPodcast } from './hooks/useEconomyNews';
 import './App.css';
 
@@ -12,9 +13,27 @@ function App() {
   const { podcasts, loading, error } = useEconomyNews();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('news');
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (!loading && podcasts.length > 0) {
+      setShowWelcome(true);
+    }
+  }, [loading, podcasts]);
 
   const handleSelectPodcast = (index: number) => {
     setSelectedIndex(index);
+  };
+
+  const handleSelectAndPlay = (index: number) => {
+    setSelectedIndex(index);
+    // Player가 마운트된 후 자동 재생되도록 플래그 설정
+    setTimeout(() => {
+      const playButton = document.querySelector('.play-btn') as HTMLButtonElement;
+      if (playButton && !playButton.disabled) {
+        playButton.click();
+      }
+    }, 100);
   };
 
   const handleClosePlayer = () => {
@@ -34,6 +53,14 @@ function App() {
 
   return (
     <div id="app">
+      {showWelcome && (
+        <WelcomePopup
+          podcasts={podcasts}
+          onPlay={handleSelectPodcast}
+          onClose={() => setShowWelcome(false)}
+          onPlayAndStart={handleSelectAndPlay}
+        />
+      )}
       {/* Home Screen */}
       <div className="home-screen">
         <header className="home-header">

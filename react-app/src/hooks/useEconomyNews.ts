@@ -56,6 +56,7 @@ async function fetchPodcastsFromS3(): Promise<EconomyPodcast[]> {
             topics: []
           },
           transcript: podcast.transcript || [],
+          relatedKeywords: podcast.relatedKeywords || [],
           articleUrl: '',
           articleImage: podcast.coverImage || ''
         };

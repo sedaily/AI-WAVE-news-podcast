@@ -25,6 +25,7 @@ export interface Podcast {
   chartHeights: number[];
   summary: Summary;
   transcript: TranscriptSegment[];
+  relatedKeywords?: string[];
 }
 
 export type PodcastKey = 'ai' | 'economy' | 'tech' | 'climate';
