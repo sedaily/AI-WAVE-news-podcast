@@ -800,7 +800,7 @@ body {
 .quiz-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 40px 24px;
+  padding: 20px 24px;
   min-height: calc(100vh - 120px);
 }
 
@@ -868,7 +868,7 @@ body {
   border-radius: 20px;
   padding: 40px;
   border: 1px solid var(--color-border);
-  min-height: 500px;
+  min-height: 450px;
 }
 
 .quiz-term {
@@ -876,7 +876,7 @@ body {
   background: transparent;
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
-  padding: 8px 20px;
+  padding: 8px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -886,7 +886,7 @@ body {
 }
 
 .quiz-question {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.4;
   margin-bottom: 32px;
@@ -897,15 +897,15 @@ body {
 .quiz-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 30px;
 }
 
 .quiz-option {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 24px;
+  gap: 12px;
+  padding: 12px 16px;
   background: var(--color-bg-elevated);
   border: 2px solid var(--color-border);
   border-radius: 12px;
@@ -945,7 +945,7 @@ body {
   align-items: center;
   justify-content: center;
   width: 40px;
-  height: 40px;
+  height: 30px;
   background: var(--color-bg);
   border-radius: 50%;
   font-weight: 700;
@@ -1177,7 +1177,7 @@ body {
 
 /* ===== History Container ===== */
 .history-container {
-  max-width: 1000px;
+  max-width: 95%;
   margin: 0 auto;
   padding: 40px 24px;
   min-height: calc(100vh - 120px);
@@ -1265,10 +1265,10 @@ body {
   border-radius: 20px;
   padding: 32px;
   margin-bottom: 20px;
-  min-height: 350px;
-  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .calendar-header {
@@ -1281,6 +1281,7 @@ body {
 .calendar-header h3 {
   font-size: 1.25rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .calendar-nav-btn {
@@ -1307,7 +1308,10 @@ body {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  grid-template-rows: repeat(6, 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .calendar-day-name {
@@ -1322,7 +1326,7 @@ body {
   aspect-ratio: 1;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  padding: 8px;
+  padding: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1330,6 +1334,8 @@ body {
   cursor: pointer;
   transition: all var(--transition-fast);
   background: var(--color-bg-elevated);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .calendar-day.empty {
@@ -1343,14 +1349,14 @@ body {
   transform: scale(1.05);
 }
 
-.calendar-day.today {
-  border-color: var(--color-accent);
-  background: rgba(78, 205, 196, 0.1);
-}
-
 .calendar-day.active {
   background: rgba(78, 205, 196, 0.1);
   border-color: #4ecdc4;
+}
+
+.calendar-day.today {
+  border-color: #ff6b35 !important;
+  background: rgba(255, 107, 53, 0.1);
 }
 
 .day-number {
@@ -1481,6 +1487,8 @@ body {
   }
 
   .calendar-grid {
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(7, 1fr);
     gap: 4px;
   }
 

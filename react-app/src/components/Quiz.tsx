@@ -97,10 +97,6 @@ function Quiz({ onClose }: QuizProps) {
 
   return (
     <div className="quiz-container">
-      <div className="quiz-header">
-        <h2>경제용어 퀴즈</h2>
-      </div>
-
       <div className="quiz-progress">
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progress}%` }} />
