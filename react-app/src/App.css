@@ -30,6 +30,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
 }
 
 #app {
@@ -332,11 +333,13 @@ body {
 .lyrics-container {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-top: 16px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .lyrics-line {
@@ -523,7 +526,9 @@ body {
 .summary-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 32px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .summary-title {
@@ -627,15 +632,44 @@ body {
 
 @media (max-width: 768px) {
   .home-header {
-    padding: 24px;
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .brand {
+    justify-content: center;
   }
 
   .home-nav {
-    display: none;
+    display: flex;
+    gap: 8px;
+    background: transparent;
+    padding: 0;
+    border: none;
+  }
+
+  .nav-link {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+  }
+
+  .nav-link.active {
+    background: transparent;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
   .issue-map-section {
-    padding: 20px 24px 40px;
+    padding: 20px 20px 40px;
   }
 
   .issue-map-title h1 {
@@ -659,12 +693,14 @@ body {
   }
 
   .player-screen {
-    height: 85vh;
+    height: 90vh;
+    border-radius: 20px 20px 0 0;
   }
 
   .player-layout {
     flex-direction: column;
     padding: 24px 20px;
+    gap: 20px;
   }
 
   .player-visual {
@@ -679,15 +715,23 @@ body {
   }
 
   .player-content {
+    padding-left: 0;
     padding-right: 0;
+    overflow: hidden;
+  }
+
+  .lyrics-container {
+    max-height: 30vh;
   }
 
   .summary-panel {
     width: 100%;
+    height: 100vh;
   }
 
   .lyrics-line {
     font-size: 1rem;
+    line-height: 1.6;
   }
 }
 
@@ -1057,7 +1101,7 @@ body {
 /* ===== Responsive Quiz ===== */
 @media (max-width: 768px) {
   .quiz-container {
-    padding: 24px 16px;
+    padding: 20px 16px;
   }
 
   .quiz-content {
@@ -1109,7 +1153,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .history-header h2 {
@@ -1140,7 +1184,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 32px;
 }
 
 .streak-card {
@@ -1186,7 +1230,7 @@ body {
   border: 1px solid var(--color-border);
   border-radius: 20px;
   padding: 32px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .calendar-header {
@@ -1341,15 +1385,56 @@ body {
 /* ===== Responsive History ===== */
 @media (max-width: 768px) {
   .history-container {
-    padding: 24px 16px;
+    padding: 20px 16px;
+  }
+
+  .history-header {
+    margin-bottom: 24px;
+  }
+
+  .history-header h2 {
+    font-size: 1.5rem;
   }
 
   .streak-section {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .streak-card {
+    padding: 12px 8px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .streak-icon {
+    font-size: 1.5rem;
+  }
+
+  .streak-info {
+    text-align: center;
+  }
+
+  .streak-number {
+    font-size: 1.25rem;
+  }
+
+  .streak-label {
+    font-size: 0.7rem;
   }
 
   .calendar-section {
-    padding: 20px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+
+  .calendar-header {
+    margin-bottom: 16px;
+  }
+
+  .calendar-header h3 {
+    font-size: 1.1rem;
   }
 
   .calendar-grid {
@@ -1357,20 +1442,39 @@ body {
   }
 
   .calendar-day {
-    padding: 4px;
+    padding: 4px 2px;
   }
 
   .day-number {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .day-indicators {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+    gap: 2px;
   }
 
   .indicator.quiz {
-    width: 14px;
-    height: 14px;
-    font-size: 0.6rem;
+    width: 12px;
+    height: 12px;
+    font-size: 0.55rem;
+  }
+
+  .activity-detail {
+    padding: 16px;
+  }
+
+  .activity-detail h4 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .activity-item {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .activity-icon {
+    font-size: 1.25rem;
   }
 }
