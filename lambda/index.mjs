@@ -224,12 +224,16 @@ try {
   console.log(`Audio uploaded to S3: ${key}`);
   console.log(`Audio URL: ${audioUrl}`);
 
-  // Duration 계산 (대략적으로 한국어 1분에 약 300자)
-  const estimatedDuration = Math.floor(script.length / 5);
+  // MP3 duration 계산 (비트레이트 기반 추정)
+  // Polly Neural은 평균 24kbps 비트레이트 사용
+  const bitrate = 24000; // 24 kbps
+  const durationSeconds = Math.floor((audioBuffer.length * 8) / bitrate);
+  
+  console.log(`Calculated duration: ${durationSeconds} seconds`);
 
   const result = {
     audioUrl: audioUrl,
-    duration: estimatedDuration
+    duration: durationSeconds
   };
   
   console.log(`Returning audio result:`, JSON.stringify(result));
@@ -382,6 +386,7 @@ try {
     const totalChars=lines.reduce((s,l)=>s+l.length,0);
     let t=0;
 
+    // 실제 오디오 길이를 사용하여 transcript 타이밍 조정
     const transcript=lines.map(l=>{
       const d=(l.length/totalChars)*p.duration;
       const seg={start:Math.floor(t),end:Math.floor(t+d),text:l};

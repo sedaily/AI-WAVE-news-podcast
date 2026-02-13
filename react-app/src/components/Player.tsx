@@ -205,7 +205,9 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
     }
   };
 
-  const progress = (currentTime / podcast.duration) * 100;
+  const progress = audioRef.current && audioRef.current.duration 
+    ? (currentTime / audioRef.current.duration) * 100 
+    : (currentTime / podcast.duration) * 100;
 
   const getLyricClass = (start: number, end: number): string => {
     if (currentTime >= start && currentTime < end) return 'lyrics-line active';
@@ -273,7 +275,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
               </div>
               <div className="progress-time">
                 <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(podcast.duration)}</span>
+                <span>{formatTime(Math.floor((audioRef.current?.duration || podcast.duration) / 10) * 10)}</span>
               </div>
             </div>
 
