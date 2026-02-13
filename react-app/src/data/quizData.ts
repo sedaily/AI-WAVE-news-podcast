@@ -470,8 +470,27 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-// 랜덤으로 5개의 퀴즈를 가져오는 함수
-export function getTodayQuiz(): QuizQuestion[] {
+// 랜덤으로 5개의 퀴즈를 가져오는 함수 (팟캐스트 키워드 기반 추천)
+export function getTodayQuiz(podcastKeywords?: string[]): QuizQuestion[] {
+  if (!podcastKeywords || podcastKeywords.length === 0) {
+    const shuffled = shuffleArray(dailyQuizzes);
+    return shuffled.slice(0, 5);
+  }
+
+  const relatedQuizzes = dailyQuizzes.filter(quiz => 
+    podcastKeywords.some(keyword => 
+      quiz.term.includes(keyword) || keyword.includes(quiz.term)
+    )
+  );
+
+  if (relatedQuizzes.length > 0) {
+    const numRelated = Math.min(relatedQuizzes.length, 3);
+    const selectedRelated = shuffleArray(relatedQuizzes).slice(0, numRelated);
+    const remainingQuizzes = dailyQuizzes.filter(q => !selectedRelated.includes(q));
+    const randomQuizzes = shuffleArray(remainingQuizzes).slice(0, 5 - numRelated);
+    return shuffleArray([...selectedRelated, ...randomQuizzes]);
+  }
+
   const shuffled = shuffleArray(dailyQuizzes);
   return shuffled.slice(0, 5);
 }

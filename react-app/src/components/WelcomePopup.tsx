@@ -22,8 +22,10 @@ export default function WelcomePopup({ podcasts, onPlay, onClose, onPlayAndStart
         score: podcast.relatedKeywords ? calculateRecommendationScore(podcast.relatedKeywords) : 0
       }));
 
-      // 점수가 가장 높은 팟캐스트 선택 (점수가 0이면 랜덤)
+      // 점수가 가장 높은 팟캐스트 선택
       const maxScore = Math.max(...podcastsWithScores.map(p => p.score));
+      
+      // 점수가 0보다 크면 추천, 아니면 랜덤
       const selected = maxScore > 0
         ? podcastsWithScores.find(p => p.score === maxScore)!
         : podcastsWithScores[Math.floor(Math.random() * podcastsWithScores.length)];

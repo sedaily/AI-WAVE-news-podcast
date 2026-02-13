@@ -2,13 +2,19 @@ import { useState } from 'react';
 import type { QuizQuestion, QuizResult } from '../types/quiz';
 import { getTodayQuiz } from '../data/quizData';
 import { saveQuizResult } from '../utils/historyStorage';
+import { useEconomyNews } from '../hooks/useEconomyNews';
 
 interface QuizProps {
   onClose: () => void;
 }
 
 function Quiz({ onClose }: QuizProps) {
-  const [questions, setQuestions] = useState<QuizQuestion[]>(getTodayQuiz());
+  const { podcasts } = useEconomyNews();
+  
+  // 팟캐스트의 모든 관련 키워드 추출
+  const allKeywords = podcasts.flatMap(p => p.relatedKeywords || []);
+  
+  const [questions, setQuestions] = useState<QuizQuestion[]>(getTodayQuiz(allKeywords));
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -54,7 +60,7 @@ function Quiz({ onClose }: QuizProps) {
   };
 
   const handleRestart = () => {
-    setQuestions(getTodayQuiz()); // 새로운 랜덤 문제 가져오기
+    setQuestions(getTodayQuiz(allKeywords));
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setShowExplanation(false);
