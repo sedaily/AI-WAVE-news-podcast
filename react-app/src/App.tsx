@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import IssueMap from './components/IssueMap';
 import Player from './components/Player';
+import Quiz from './components/Quiz';
 import { useEconomyNews, type EconomyPodcast } from './hooks/useEconomyNews';
 import './App.css';
+
+type ViewMode = 'news' | 'quiz';
 
 function App() {
   const { podcasts, loading, error } = useEconomyNews();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('news');
 
   const handleSelectPodcast = (index: number) => {
     setSelectedIndex(index);
@@ -14,6 +18,10 @@ function App() {
 
   const handleClosePlayer = () => {
     setSelectedIndex(null);
+  };
+
+  const handleCloseQuiz = () => {
+    setViewMode('news');
   };
 
   const selectedPodcast: EconomyPodcast | null = selectedIndex !== null ? podcasts[selectedIndex] : null;
@@ -29,15 +37,31 @@ function App() {
             <span className="brand-name">경제뉴스캐스트</span>
           </div>
           <nav className="home-nav">
-            <span className="nav-link active">오늘의 경제</span>
-            <span className="nav-link">인기 콘텐츠</span>
+            <span 
+              className={`nav-link ${viewMode === 'news' ? 'active' : ''}`}
+              onClick={() => setViewMode('news')}
+            >
+              오늘의 경제
+            </span>
+            <span 
+              className={`nav-link ${viewMode === 'quiz' ? 'active' : ''}`}
+              onClick={() => setViewMode('quiz')}
+            >
+              경제 Quiz
+            </span>
             <span className="nav-link">아카이브</span>
           </nav>
         </header>
 
-        {loading && <div className="loading-message">뉴스를 불러오는 중...</div>}
-        {error && <div className="error-message">{error}</div>}
-        {!loading && !error && <IssueMap podcasts={podcasts} onSelectPodcast={handleSelectPodcast} />}
+        {viewMode === 'news' && (
+          <>
+            {loading && <div className="loading-message">뉴스를 불러오는 중...</div>}
+            {error && <div className="error-message">{error}</div>}
+            {!loading && !error && <IssueMap podcasts={podcasts} onSelectPodcast={handleSelectPodcast} />}
+          </>
+        )}
+        
+        {viewMode === 'quiz' && <Quiz onClose={handleCloseQuiz} />}
       </div>
 
       {/* Player Screen */}
