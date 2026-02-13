@@ -20,7 +20,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [_audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [hasScored, setHasScored] = useState(false);
+  const [scoreType, setScoreType] = useState<'none' | 'play' | 'skip'>('none');
   const progressRef = useRef<HTMLDivElement>(null);
   const lyricsRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -29,7 +29,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
     if (!isActive) {
       setIsPlaying(false);
       setCurrentTime(0);
-      setHasScored(false);
+      setScoreType('none');
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -56,7 +56,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
       setIsPlaying(false);
       setCurrentTime(0);
       setAudioUrl(null);
-      setHasScored(false);
+      setScoreType('none');
     };
   }, [podcast.audioUrl]);
 
@@ -78,8 +78,8 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
       setIsPlaying(false);
       // 완료 시 점수 부여
       if (podcast.relatedKeywords && podcast.relatedKeywords.length > 0) {
-        updateKeywordScores(podcast.relatedKeywords, true);
-        setHasScored(true);
+        updateKeywordScores(podcast.relatedKeywords, true, false);
+        setScoreType('none'); // 완료 후 초기화
       }
     };
     
@@ -114,7 +114,7 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
     
     console.log('Toggle play, podcast:', podcast.keyword);
     console.log('Related keywords:', podcast.relatedKeywords);
-    console.log('Has scored:', hasScored);
+    console.log('Score type:', scoreType);
     
     if (isPlaying) {
       audioRef.current.pause();
@@ -124,16 +124,15 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
         console.error('Play error:', err);
       });
       setIsPlaying(true);
-      // 뉴스를 재생하면 읽음으로 기록
       markNewsRead();
       // 첫 재생 시에만 부분 점수 부여
-      if (!hasScored && podcast.relatedKeywords && podcast.relatedKeywords.length > 0) {
-        console.log('Updating keyword scores:', podcast.relatedKeywords);
-        updateKeywordScores(podcast.relatedKeywords, false);
-        setHasScored(true);
+      if (scoreType === 'none' && podcast.relatedKeywords && podcast.relatedKeywords.length > 0) {
+        console.log('Updating keyword scores (play):', podcast.relatedKeywords);
+        updateKeywordScores(podcast.relatedKeywords, false, false);
+        setScoreType('play');
         console.log('Scores updated, localStorage:', localStorage.getItem('podcast_user_preferences'));
       } else {
-        console.log('Skipping score update - hasScored:', hasScored, 'keywords:', podcast.relatedKeywords);
+        console.log('Skipping score update - scoreType:', scoreType, 'keywords:', podcast.relatedKeywords);
       }
     }
   };
@@ -146,7 +145,14 @@ function Player({ podcast, isActive, onClose }: PlayerProps) {
 
   const skipForward = () => {
     if (audioRef.current) {
-      audioRef.current.currentTime = Math.min(audioRef.current.duration || podcast.duration, audioRef.current.currentTime + 10);
+      const newTime = Math.min(audioRef.current.duration || podcast.duration, audioRef.current.currentTime + 10);
+      audioRef.current.currentTime = newTime;
+      
+      // 스킵 시 감점 부여 (한 번만)
+      if (scoreType === 'none' && podcast.relatedKeywords && podcast.relatedKeywords.length > 0) {
+        updateKeywordScores(podcast.relatedKeywords, false, true);
+        setScoreType('skip');
+      }
     }
   };
 

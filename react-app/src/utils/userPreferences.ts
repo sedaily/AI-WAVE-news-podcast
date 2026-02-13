@@ -12,6 +12,7 @@ interface UserPreferences {
 const STORAGE_KEY = 'podcast_user_preferences';
 const SCORE_COMPLETE = 3; // 완료 시 점수
 const SCORE_PARTIAL = 1;  // 중단 시 점수
+const SCORE_SKIP = -1;    // 스킵 후 중단 시 감점
 
 // 사용자 선호도 불러오기
 export function getUserPreferences(): UserPreferences {
@@ -28,10 +29,10 @@ function saveUserPreferences(prefs: UserPreferences): void {
 }
 
 // 팟캐스트 청취 시 키워드 점수 업데이트
-export function updateKeywordScores(relatedKeywords: string[], isComplete: boolean = false): void {
+export function updateKeywordScores(relatedKeywords: string[], isComplete: boolean = false, isSkip: boolean = false): void {
   const prefs = getUserPreferences();
   const now = Date.now();
-  const scoreToAdd = isComplete ? SCORE_COMPLETE : SCORE_PARTIAL;
+  const scoreToAdd = isComplete ? SCORE_COMPLETE : (isSkip ? SCORE_SKIP : SCORE_PARTIAL);
 
   relatedKeywords.forEach(keyword => {
     if (prefs.keywordScores[keyword]) {
