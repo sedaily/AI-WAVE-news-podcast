@@ -1,107 +1,137 @@
-# 이슈캐스트 - 모바일 팟캐스트 웹앱
+# 이슈캐스트 - AI 경제 뉴스 팟캐스트
 
-음악 앱 스타일의 모바일 최적화 팟캐스트 플랫폼
+음악 앱 스타일의 모바일 최적화 팟캐스트 플랫폼. 매일 경제 뉴스를 AI가 분석하여 팟캐스트로 자동 생성.
 
-## 기능
+**Tech Stack**: React + Vite + AWS Lambda + Claude AI + AWS Polly
 
-- 📱 모바일 최적화 UI
-- 🎧 이슈맵 기반 팟캐스트 탐색
-- 🎵 음악 앱 스타일 플레이어
-- 🎤 ElevenLabs TTS 음성 생성
-- 📊 인터랙티브 대본 (가사 스타일)
+---
 
-## 실행 방법
+## 주요 기능
 
-### 프론트엔드 (React)
+- 이슈맵 기반 팟캐스트 탐색 (인터랙티브 네트워크)
+- AI 대본 생성 (Claude 3.5 Haiku)
+- TTS 음성 생성 (AWS Polly / ElevenLabs)
+- 가사 스타일 인터랙티브 대본
+- 모바일 최적화 UI
+
+---
+
+## Quick Start
+
+### 프론트엔드
 
 ```bash
 cd frontend
+cp .env.example .env   # 환경변수 설정
 npm install
 npm run dev
 ```
 
-브라우저에서 http://localhost:5173 접속
+http://localhost:5173 접속
 
-### 프로토타입 (HTML/JS)
-
-```bash
-cd prototype
-python -m http.server 8000
-```
-
-브라우저에서 http://localhost:8000 접속
-
-## 설정
-
-### ElevenLabs API 키 설정
-
-1. `frontend/.env.example`을 복사하여 `frontend/.env` 생성
-2. 환경변수 설정:
+### 백엔드 (Lambda)
 
 ```bash
-cp frontend/.env.example frontend/.env
+cd backend
+npm install
+
+# 배포
+../scripts/deploy.sh
 ```
 
-```env
-VITE_ELEVENLABS_API_KEY=your_api_key_here
-VITE_ELEVENLABS_VOICE_ID=your_voice_id_here
+---
+
+## AWS 리소스
+
+| 서비스 | 리소스명 | 용도 |
+|--------|----------|------|
+| **S3** | `sedaily-news-xml-storage` | 뉴스 XML, 팟캐스트 MP3/JSON 저장 |
+| **Lambda** | `economy-podcast-generator` | 팟캐스트 자동 생성 |
+| **Polly** | Seoyeon (Neural) | 한국어 TTS |
+| **Region** | `us-east-1` | - |
+
+### URL
+
+| 항목 | URL |
+|------|-----|
+| Lambda URL | `https://or4di2zz5sefbmpy5niafkm6bu0uamot.lambda-url.us-east-1.on.aws` |
+| S3 Podcasts | `https://sedaily-news-xml-storage.s3.amazonaws.com/podcasts/` |
+
+### S3 구조
+
+```
+sedaily-news-xml-storage/
+├── daily-xml/{YYYYMMDD}.xml        # 뉴스 XML
+└── podcasts/
+    ├── data-{YYYYMMDD}.json        # 팟캐스트 메타데이터
+    └── podcast-{date}-{n}.mp3      # 오디오 파일
 ```
 
-## 배포
+### 환경변수
 
-Lambda 배포는 [docs/deployment.md](docs/deployment.md) 참조
+**Lambda** (AWS 콘솔에서 설정)
+| 변수 | 설명 |
+|------|------|
+| `ANTHROPIC_API_KEY` | Claude API 키 |
 
-```bash
-# Linux/Mac
-./scripts/deploy.sh
+**Frontend** (`frontend/.env`)
+| 변수 | 설명 |
+|------|------|
+| `VITE_ELEVENLABS_API_KEY` | ElevenLabs API 키 |
+| `VITE_ELEVENLABS_VOICE_ID` | ElevenLabs 음성 ID |
 
-# Windows
-scripts\deploy.bat
-```
-
-## 향후 확장 계획
-
-### AWS 연동
-- S3: 팟캐스트 오디오 파일 저장
-- CloudFront: CDN을 통한 빠른 콘텐츠 전송
-- Lambda: 팟캐스트 자동 생성 (TTS)
-- DynamoDB: 메타데이터 저장
-- API Gateway: REST API 엔드포인트
-
-### 팟캐스트 자동화
-- AI 기반 뉴스 크롤링 및 요약
-- TTS를 통한 자동 음성 생성
-- 자동 인포그래픽 생성
-- 스케줄링된 콘텐츠 업데이트
+---
 
 ## 프로젝트 구조
 
 ```
-├── frontend/               # React + TypeScript 프론트엔드
+├── frontend/           # React + TypeScript + Vite
 │   ├── src/
-│   │   ├── components/     # React 컴포넌트
-│   │   ├── config/         # API 설정
-│   │   ├── hooks/          # 커스텀 훅
-│   │   ├── services/       # API 서비스
-│   │   ├── types/          # TypeScript 타입
-│   │   ├── utils/          # 유틸리티 함수
-│   │   └── data/           # 더미 데이터
-│   ├── .env.example        # 환경변수 템플릿
+│   │   ├── components/ # Player, IssueMap, Quiz 등
+│   │   ├── hooks/      # useEconomyNews
+│   │   ├── services/   # newsService
+│   │   └── types/      # TypeScript 타입
+│   └── .env.example
+├── backend/            # AWS Lambda (Node.js)
+│   ├── index.mjs       # Lambda 핸들러
 │   └── package.json
-├── backend/                # AWS Lambda 백엔드
-│   ├── index.mjs           # Lambda 핸들러
-│   └── package.json
-├── prototype/              # HTML/JS 프로토타입
-│   ├── index.html
-│   ├── app.js
-│   ├── data.js
-│   └── styles.css
-├── scripts/                # 배포 및 유틸리티 스크립트
-│   ├── deploy.sh           # Lambda 배포 (Linux/Mac)
-│   ├── deploy.bat          # Lambda 배포 (Windows)
-│   └── create-thumbnail.js # 썸네일 생성
-├── docs/                   # 문서
-│   ├── phases/             # 개발 단계별 문서
-│   └── deployment.md       # 배포 가이드
-└── .gitignore
+├── prototype/          # HTML/JS 프로토타입
+├── scripts/            # 배포 스크립트
+│   ├── deploy.sh
+│   └── deploy.bat
+└── docs/               # 문서
+    ├── phases/         # PHASE-01 ~ 04
+    └── deployment.md
 ```
+
+---
+
+## 배포
+
+```bash
+# Lambda 배포
+./scripts/deploy.sh
+
+# 수동 배포
+cd backend
+zip -r function.zip . -x "*.git*" "*.md"
+aws lambda update-function-code \
+  --function-name economy-podcast-generator \
+  --zip-file fileb://function.zip
+```
+
+---
+
+## 문서
+
+- [배포 가이드](docs/deployment.md)
+- [PHASE-01: 초기 UI](docs/phases/PHASE-01-initial-mobile-ui.md)
+- [PHASE-02: ElevenLabs TTS](docs/phases/PHASE-02-elevenlabs-tts-integration.md)
+- [PHASE-03: Lambda 자동화](docs/phases/PHASE-03-interactive-issue-map.md)
+- [PHASE-04: 프로젝트 정리](docs/phases/PHASE-04-project-structure-security.md)
+
+---
+
+## License
+
+Apache License 2.0 - Seoul Economic Daily (서울경제신문)
