@@ -56,7 +56,6 @@ function App() {
       {showWelcome && (
         <WelcomePopup
           podcasts={podcasts}
-          onPlay={handleSelectPodcast}
           onClose={() => setShowWelcome(false)}
           onPlayAndStart={handleSelectAndPlay}
         />

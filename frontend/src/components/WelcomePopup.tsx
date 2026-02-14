@@ -5,12 +5,11 @@ import './WelcomePopup.css';
 
 interface WelcomePopupProps {
   podcasts: EconomyPodcast[];
-  onPlay: (index: number) => void;
   onClose: () => void;
   onPlayAndStart: (index: number) => void;
 }
 
-export default function WelcomePopup({ podcasts, onPlay, onClose, onPlayAndStart }: WelcomePopupProps) {
+export default function WelcomePopup({ podcasts, onClose, onPlayAndStart }: WelcomePopupProps) {
   const [randomPodcast, setRandomPodcast] = useState<{ podcast: EconomyPodcast; index: number } | null>(null);
 
   useEffect(() => {
