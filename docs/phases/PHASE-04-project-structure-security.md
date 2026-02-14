@@ -39,11 +39,14 @@ Before                          After
 ├── image.png       →          │   ├── styles.css
 ├── create-thumbnail.js →      │   └── image.png
 ├── react-app/                 ├── scripts/
-├── lambda/                    │   └── create-thumbnail.js
-└── docs/                      ├── react-app/
+├── lambda/                    │   ├── create-thumbnail.js
+└── docs/                      │   ├── deploy.sh
+                               │   └── deploy.bat
+                               ├── frontend/  (react-app →)
                                │   └── .env.example  ✨ NEW
-                               ├── lambda/
+                               ├── backend/   (lambda →)
                                ├── docs/
+                               │   └── deployment.md  ✨ NEW
                                └── .gitignore  ✨ NEW
 ```
 

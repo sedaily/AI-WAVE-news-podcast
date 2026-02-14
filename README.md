@@ -12,10 +12,10 @@
 
 ## 실행 방법
 
-### React 앱 (메인)
+### 프론트엔드 (React)
 
 ```bash
-cd react-app
+cd frontend
 npm install
 npm run dev
 ```
@@ -26,8 +26,6 @@ npm run dev
 
 ```bash
 cd prototype
-# 간단히 index.html을 브라우저에서 열기
-# 또는 로컬 서버 실행
 python -m http.server 8000
 ```
 
@@ -37,16 +35,28 @@ python -m http.server 8000
 
 ### ElevenLabs API 키 설정
 
-1. `react-app/.env.example`을 복사하여 `react-app/.env` 생성
+1. `frontend/.env.example`을 복사하여 `frontend/.env` 생성
 2. 환경변수 설정:
 
 ```bash
-cp react-app/.env.example react-app/.env
+cp frontend/.env.example frontend/.env
 ```
 
 ```env
 VITE_ELEVENLABS_API_KEY=your_api_key_here
 VITE_ELEVENLABS_VOICE_ID=your_voice_id_here
+```
+
+## 배포
+
+Lambda 배포는 [docs/deployment.md](docs/deployment.md) 참조
+
+```bash
+# Linux/Mac
+./scripts/deploy.sh
+
+# Windows
+scripts\deploy.bat
 ```
 
 ## 향후 확장 계획
@@ -67,7 +77,7 @@ VITE_ELEVENLABS_VOICE_ID=your_voice_id_here
 ## 프로젝트 구조
 
 ```
-├── react-app/              # React + TypeScript 메인 앱
+├── frontend/               # React + TypeScript 프론트엔드
 │   ├── src/
 │   │   ├── components/     # React 컴포넌트
 │   │   ├── config/         # API 설정
@@ -78,17 +88,20 @@ VITE_ELEVENLABS_VOICE_ID=your_voice_id_here
 │   │   └── data/           # 더미 데이터
 │   ├── .env.example        # 환경변수 템플릿
 │   └── package.json
-├── lambda/                 # AWS Lambda 함수
+├── backend/                # AWS Lambda 백엔드
 │   ├── index.mjs           # Lambda 핸들러
-│   └── economy-news-api/   # 경제뉴스 API
+│   └── package.json
 ├── prototype/              # HTML/JS 프로토타입
 │   ├── index.html
 │   ├── app.js
 │   ├── data.js
 │   └── styles.css
-├── scripts/                # 유틸리티 스크립트
-│   └── create-thumbnail.js
+├── scripts/                # 배포 및 유틸리티 스크립트
+│   ├── deploy.sh           # Lambda 배포 (Linux/Mac)
+│   ├── deploy.bat          # Lambda 배포 (Windows)
+│   └── create-thumbnail.js # 썸네일 생성
 ├── docs/                   # 문서
-│   └── phases/             # 개발 단계별 문서
+│   ├── phases/             # 개발 단계별 문서
+│   └── deployment.md       # 배포 가이드
 └── .gitignore
 ```

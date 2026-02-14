@@ -1,12 +1,19 @@
 @echo off
-REM Lambda 함수 이름
+REM Lambda 배포 스크립트
+REM 사용법: scripts\deploy.bat (프로젝트 루트에서 실행)
+
 SET FUNCTION_NAME=economy-podcast-generator
+SET BACKEND_DIR=backend
+
+echo 📂 Moving to backend directory...
+cd %~dp0..
+cd %BACKEND_DIR%
 
 echo 📦 Installing dependencies...
 call npm install
 
 echo 🗜️ Creating deployment package...
-powershell Compress-Archive -Path * -DestinationPath function.zip -Force -Exclude deploy.bat,deploy.sh,*.md,.git*
+powershell Compress-Archive -Path * -DestinationPath function.zip -Force
 
 echo 🚀 Updating Lambda function...
 aws lambda update-function-code --function-name %FUNCTION_NAME% --zip-file fileb://function.zip
