@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 
 # Build outputs
 dist/
@@ -11,12 +10,6 @@ build/
 .env
 .env.local
 .env.*.local
-
-# API Keys & Secrets
-# elevenlabs.ts는 환경변수를 사용하므로 추적 가능
-# .env 파일만 무시
-.env
-.env.local
 
 # OS files
 .DS_Store
@@ -41,6 +34,6 @@ tmp/
 temp/
 *.tmp
 
-# Lambda deployment artifacts
-lambda/*.zip
-lambda/**/node_modules/
+# Backend (Lambda) deployment artifacts
+backend/*.zip
+backend/**/node_modules/
