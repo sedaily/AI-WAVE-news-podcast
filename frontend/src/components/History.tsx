@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getHistory, calculateStreak, getTodayDate } from '../utils/historyStorage';
-import { getTopKeywords } from '../utils/userPreferences';
 import type { DailyActivity } from '../types/history';
 
 interface HistoryProps {
@@ -17,7 +16,6 @@ function History({ onClose: _onClose }: HistoryProps) {
   }, []);
 
   const streak = calculateStreak();
-  const topKeywords = getTopKeywords(10);
 
   // 캘린더 생성
   const generateCalendar = () => {
@@ -161,24 +159,6 @@ function History({ onClose: _onClose }: HistoryProps) {
         </div>
       )}
 
-      {/* 관심 키워드 */}
-      <div className="keywords-section">
-        <h4>관심 키워드</h4>
-        {topKeywords.length > 0 ? (
-          <div className="keywords-list">
-            {topKeywords.map(({ keyword, score }) => (
-              <div key={keyword} className="keyword-item">
-                <span className="keyword-name">{keyword}</span>
-                <span className="keyword-score">{score}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p style={{ color: 'var(--color-text-muted)', textAlign: 'center', padding: '20px' }}>
-            팟캐스트를 들으면 관심 키워드가 표시됩니다
-          </p>
-        )}
-      </div>
     </div>
   );
 }

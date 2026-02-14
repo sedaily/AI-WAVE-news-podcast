@@ -107,10 +107,9 @@ sedaily-news-xml-storage/           # 백엔드 데이터 (us-east-1)
 ├── backend/            # AWS Lambda (Node.js)
 │   ├── index.mjs       # Lambda 핸들러
 │   └── package.json
-├── prototype/          # HTML/JS 프로토타입
 ├── scripts/            # 배포 스크립트
-│   ├── deploy.sh
-│   └── deploy.bat
+│   ├── deploy-frontend.sh
+│   └── deploy.sh
 └── docs/               # 문서
     ├── phases/         # PHASE-01 ~ 04
     └── deployment.md
