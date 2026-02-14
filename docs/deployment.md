@@ -2,26 +2,45 @@
 
 이슈캐스트 프로젝트의 배포 방법을 설명합니다.
 
-## 프론트엔드 배포
+## 프론트엔드 배포 (CloudFront)
 
-### 빌드
+### 배포 스크립트 (권장)
+
+```bash
+./scripts/deploy-frontend.sh
+```
+
+### 스크립트 동작 과정
+
+1. `frontend/` 폴더에서 `npm run build` 실행
+2. `dist/` 폴더를 S3에 업로드
+3. CloudFront 캐시 무효화
+
+### AWS 리소스
+
+| 항목 | 값 |
+|------|-----|
+| S3 버킷 | `news-podcast-app-20260211` |
+| CloudFront ID | `E24UFRZVWBF3J0` |
+| 리전 | `ap-northeast-2` |
+| URL | https://d3jebiel18f4l2.cloudfront.net |
+
+### 수동 배포
 
 ```bash
 cd frontend
 npm install
 npm run build
+
+# S3 업로드
+aws s3 sync dist/ s3://news-podcast-app-20260211/ \
+  --region ap-northeast-2 --delete
+
+# CloudFront 캐시 무효화
+aws cloudfront create-invalidation \
+  --distribution-id E24UFRZVWBF3J0 \
+  --paths "/*"
 ```
-
-빌드 결과물은 `frontend/dist/` 폴더에 생성됩니다.
-
-### 배포 옵션
-
-1. **S3 + CloudFront** (권장)
-   - `dist/` 폴더를 S3 버킷에 업로드
-   - CloudFront로 CDN 설정
-
-2. **Vercel / Netlify**
-   - Git 연동으로 자동 배포
 
 ---
 

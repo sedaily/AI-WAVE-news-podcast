@@ -121,15 +121,11 @@ sedaily-news-xml-storage/           # 백엔드 데이터 (us-east-1)
 ## 배포
 
 ```bash
-# Lambda 배포
-./scripts/deploy.sh
+# 프론트엔드 배포 (CloudFront)
+./scripts/deploy-frontend.sh
 
-# 수동 배포
-cd backend
-zip -r function.zip . -x "*.git*" "*.md"
-aws lambda update-function-code \
-  --function-name economy-podcast-generator \
-  --zip-file fileb://function.zip
+# 백엔드 배포 (Lambda)
+./scripts/deploy.sh
 ```
 
 ---
