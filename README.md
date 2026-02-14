@@ -25,6 +25,7 @@ npm run dev
 ### 프로토타입 (HTML/JS)
 
 ```bash
+cd prototype
 # 간단히 index.html을 브라우저에서 열기
 # 또는 로컬 서버 실행
 python -m http.server 8000
@@ -36,14 +37,16 @@ python -m http.server 8000
 
 ### ElevenLabs API 키 설정
 
-`react-app/src/config/elevenlabs.ts` 파일에서:
+1. `react-app/.env.example`을 복사하여 `react-app/.env` 생성
+2. 환경변수 설정:
 
-```typescript
-export const ELEVENLABS_CONFIG = {
-  apiKey: 'your_api_key_here',
-  voiceId: 'your_voice_id',
-  // ...
-};
+```bash
+cp react-app/.env.example react-app/.env
+```
+
+```env
+VITE_ELEVENLABS_API_KEY=your_api_key_here
+VITE_ELEVENLABS_VOICE_ID=your_voice_id_here
 ```
 
 ## 향후 확장 계획
@@ -68,12 +71,24 @@ export const ELEVENLABS_CONFIG = {
 │   ├── src/
 │   │   ├── components/     # React 컴포넌트
 │   │   ├── config/         # API 설정
-│   │   ├── data/           # 더미 데이터
-│   │   └── types/          # TypeScript 타입
+│   │   ├── hooks/          # 커스텀 훅
+│   │   ├── services/       # API 서비스
+│   │   ├── types/          # TypeScript 타입
+│   │   ├── utils/          # 유틸리티 함수
+│   │   └── data/           # 더미 데이터
+│   ├── .env.example        # 환경변수 템플릿
 │   └── package.json
-├── backend/                # AWS Lambda 함수 (미사용)
-├── index.html              # 프로토타입 HTML
-├── styles.css              # 프로토타입 CSS
-├── app.js                  # 프로토타입 JS
-└── data.js                 # 프로토타입 데이터
+├── lambda/                 # AWS Lambda 함수
+│   ├── index.mjs           # Lambda 핸들러
+│   └── economy-news-api/   # 경제뉴스 API
+├── prototype/              # HTML/JS 프로토타입
+│   ├── index.html
+│   ├── app.js
+│   ├── data.js
+│   └── styles.css
+├── scripts/                # 유틸리티 스크립트
+│   └── create-thumbnail.js
+├── docs/                   # 문서
+│   └── phases/             # 개발 단계별 문서
+└── .gitignore
 ```
