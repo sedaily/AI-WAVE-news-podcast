@@ -43,24 +43,36 @@ npm install
 
 ## AWS 리소스
 
+### 프론트엔드 (ap-northeast-2)
+
+| 서비스 | 리소스명 | 용도 |
+|--------|----------|------|
+| **S3** | `news-podcast-app-20260211` | 프론트엔드 정적 호스팅 |
+| **CloudFront** | `E24UFRZVWBF3J0` | CDN 배포 |
+
+### 백엔드 (us-east-1)
+
 | 서비스 | 리소스명 | 용도 |
 |--------|----------|------|
 | **S3** | `sedaily-news-xml-storage` | 뉴스 XML, 팟캐스트 MP3/JSON 저장 |
 | **Lambda** | `economy-podcast-generator` | 팟캐스트 자동 생성 |
 | **Polly** | Seoyeon (Neural) | 한국어 TTS |
-| **Region** | `us-east-1` | - |
 
 ### URL
 
 | 항목 | URL |
 |------|-----|
+| **웹사이트** | https://d3jebiel18f4l2.cloudfront.net |
 | Lambda URL | `https://or4di2zz5sefbmpy5niafkm6bu0uamot.lambda-url.us-east-1.on.aws` |
 | S3 Podcasts | `https://sedaily-news-xml-storage.s3.amazonaws.com/podcasts/` |
 
 ### S3 구조
 
 ```
-sedaily-news-xml-storage/
+news-podcast-app-20260211/          # 프론트엔드 (ap-northeast-2)
+└── dist/                           # Vite 빌드 결과물
+
+sedaily-news-xml-storage/           # 백엔드 데이터 (us-east-1)
 ├── daily-xml/{YYYYMMDD}.xml        # 뉴스 XML
 └── podcasts/
     ├── data-{YYYYMMDD}.json        # 팟캐스트 메타데이터
