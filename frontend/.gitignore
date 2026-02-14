@@ -25,6 +25,3 @@ dist-ssr
 
 # API Keys and Config
 src/config/elevenlabs.ts
-
-# Backend (AWS Lambda)
-../backend/
