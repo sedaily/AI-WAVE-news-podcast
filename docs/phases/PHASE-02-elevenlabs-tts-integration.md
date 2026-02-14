@@ -123,8 +123,8 @@ const generateAudio = async () => {
 
 ```typescript
 export const ELEVENLABS_CONFIG = {
-  apiKey: 'sk_ce1357648ecc0ee7a2248034ac018ef53ea2f7517214beb2',
-  voiceId: 'zgDzx5jLLCqEp6Fl7Kl7',
+  apiKey: process.env.ELEVENLABS_API_KEY || 'YOUR_API_KEY_HERE',
+  voiceId: 'YOUR_VOICE_ID_HERE',
   model: 'eleven_multilingual_v2',
   voiceSettings: {
     stability: 0.5,
