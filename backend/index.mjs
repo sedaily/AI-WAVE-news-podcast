@@ -1,16 +1,45 @@
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
-import { PollyClient, SynthesizeSpeechCommand } from '@aws-sdk/client-polly';
+import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { XMLParser } from 'fast-xml-parser';
-import Anthropic from '@anthropic-ai/sdk';
 
 const s3 = new S3Client({ region: 'us-east-1' });
-const polly = new PollyClient({ region: 'us-east-1' });
+const bedrock = new BedrockRuntimeClient({ region: 'us-east-1' });
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
-});
+// ElevenLabs 설정
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY || 'sk_7f59eb48078438994e86a57f77bc056cadeacc6c9ab0c0fa';
+const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'AW5wrnG1jVizOYY7R1Oo'; // 지원 (여성) - 밝고 예쁜 톤
 
-const MODEL = 'claude-3-5-haiku-20241022';
+// 예쁜 목소리 설정
+const VOICE_SETTINGS = {
+  stability: 0.8,
+  similarity_boost: 0.7,
+  style: 0.25,
+  use_speaker_boost: true
+};
+
+// Bedrock Claude 모델 (Claude Haiku 4.5 - Global Inference Profile)
+const MODEL_ID = 'global.anthropic.claude-haiku-4-5-20251001-v1:0';
+
+// Bedrock Claude 호출 함수
+async function invokeClaudeOnBedrock(prompt, maxTokens = 2000, temperature = 1.0) {
+  const payload = {
+    anthropic_version: 'bedrock-2023-05-31',
+    max_tokens: maxTokens,
+    temperature: temperature,
+    messages: [{ role: 'user', content: prompt }]
+  };
+
+  const command = new InvokeModelCommand({
+    modelId: MODEL_ID,
+    contentType: 'application/json',
+    accept: 'application/json',
+    body: JSON.stringify(payload)
+  });
+
+  const response = await bedrock.send(command);
+  const result = JSON.parse(new TextDecoder().decode(response.body));
+  return result.content[0].text;
+}
 
 const ECONOMY_CODES = ['3134','3137','3138','3139','3140','3141','3143','3145'];
 
@@ -36,13 +65,8 @@ JSON만 출력:
 각 클러스터의 relatedKeywords에는 해당 키워드와 관련있는 다른 키워드들을 포함하세요.
 `;
 
-  const res = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 2000,
-    messages: [{ role:'user', content: prompt }]
-  });
-
-  const parsed = safeJsonParse(res.content[0].text);
+  const responseText = await invokeClaudeOnBedrock(prompt, 2000);
+  const parsed = safeJsonParse(responseText);
 
   if (!parsed.clusters?.length) {
     return {
@@ -68,187 +92,157 @@ function clusterArticles(articles, clusters) {
 }
 
 async function generateScript(cluster) {
-  // 기사 제목과 내용을 모두 포함
-  const articlesText = cluster.articles
-    .map((a, i) => `
-[기사 ${i + 1}]
-제목: ${a.title}
-내용: ${a.content.substring(0, 500)}...
-`)
-    .join('\n');
+  // 기사 제목만 사용 (짧은 대본용)
+  const articleTitles = cluster.articles
+    .map(a => a.title)
+    .join(', ');
 
   const prompt = `
-당신은 "어려운 경제 뉴스를 일상 언어로 풀어주는 설명형 팟캐스트 진행자"입니다.
-
-목표:
-경제 지식이 거의 없는 일반 사람도 이해할 수 있게,
-모든 경제 용어와 현상을 생활 예시 중심으로 설명하세요.
+1분짜리 경제 뉴스 팟캐스트 대본을 작성하세요.
 
 주제: ${cluster.keyword}
 요약: ${cluster.summary}
+관련 기사: ${articleTitles}
 
-관련 기사 내용:
-${articlesText}
-
-대본 작성 방식:
-
-- 경제 용어가 나오면 반드시 바로 풀어서 설명
-  예:
-  "금리 인상, 쉽게 말하면 은행 이자가 올라서 대출 부담이 커진다는 뜻이에요"
-
-- 숫자나 지표가 나오면 반드시 현실 예시 추가
-  예:
-  "이건 월급 300만 원 받는 직장인이 매달 10만 원 더 내는 느낌이에요"
-
-- 항상 이렇게 말하듯 설명:
-  "쉽게 말하면"
-  "예를 들어"
-  "우리 일상으로 보면"
-  "만약 여러분이라면"
+규칙:
+- 정확히 250~300자 (1분 분량)
+- 구어체로 친근하게
+- 핵심만 간결하게
 
 구성:
+1. 짧은 인사 (1문장)
+2. 오늘의 핵심 뉴스 (2~3문장)
+3. 왜 중요한지 (1문장)
+4. 마무리 인사 (1문장)
 
-1. 자연스러운 인사 + 오늘 주제 소개
-2. 이 이슈가 왜 중요한지 생활 예시로 설명
-3. 기사 내용 하나씩 풀어서 설명
-   - 전문 용어 → 생활 언어
-   - 정책 → 개인에게 어떤 영향인지
-   - 기업 이야기 → 소비자 입장에서 설명
-4. 청년 / 직장인 / 자영업자 / 투자자 각각 어떤 영향 있는지
-5. 앞으로 우리가 주의해야 할 점 정리
-6. 관련된 경제 용어 하나 소개
-7. 부드러운 마무리
+예시:
+"안녕하세요, 오늘의 경제 브리핑입니다. 삼성전자가 새로운 AI 칩을 발표했는데요, 이번 칩은 기존보다 성능이 2배 향상됐다고 합니다. 스마트폰 성능이 더 좋아질 전망이에요. 내일 또 만나요!"
 
-필수 규칙:
-
-- 최소 2500자 이상
-- 실제 말하는 것처럼 구어체
-- "여러분", "~거든요", "~잖아요", "~죠" 적극 사용
-- 경제 용어는 반드시 풀어서 설명
-- 어려운 표현 절대 사용 금지
-- 교수처럼 말하지 말 것
-- 뉴스 읽듯 말하지 말 것
-- 친구에게 설명하듯 말할 것
-- 섹션 제목, 번호 절대 쓰지 말 것
-- 효과음 관련 내용 절대 쓰지 말 것
-- (), [], ** 같은 연출 금지
-- 진행자 이름 언급 금지
-
-핵심 철학:
-
-"경제 공부하는 방송"이 아니라  
-"경제 뉴스를 같이 이해하는 대화"
-
-위 조건을 지켜서
-친절하고 생활 밀착형 대본만 출력하세요.
+대본만 출력하세요:
 `;
 
-const res = await anthropic.messages.create({
-  model: MODEL,
-  max_tokens: 4096,
-  temperature: 0.7,
-  messages:[{role:'user',content:prompt}]
-});
-
-return res.content[0].text.trim();
+  const responseText = await invokeClaudeOnBedrock(prompt, 500, 0.7);
+  return responseText.trim();
 }
 
 async function generateAudio(script, id) {
-try {
-  // Polly는 최대 3000자까지 처리 가능
-  const maxLength = 2900;
-  let audioChunks = [];
-  
-  // 대본을 3000자 단위로 분할
-  if (script.length > maxLength) {
-    console.log(`Script too long (${script.length} chars), splitting...`);
-    const parts = [];
-    for (let i = 0; i < script.length; i += maxLength) {
-      parts.push(script.substring(i, i + maxLength));
-    }
-    
-    // 각 부분을 순차적으로 처리
-    for (let i = 0; i < parts.length; i++) {
-      console.log(`Generating audio part ${i + 1}/${parts.length}`);
-      const command = new SynthesizeSpeechCommand({
-        Text: parts[i],
-        OutputFormat: 'mp3',
-        VoiceId: 'Seoyeon',
-        Engine: 'neural',
-        LanguageCode: 'ko-KR'
-      });
-      
-      const response = await polly.send(command);
-      const chunks = [];
-      for await (const chunk of response.AudioStream) {
-        chunks.push(chunk);
+  try {
+    // ElevenLabs는 최대 5000자까지 처리 가능
+    const maxLength = 4500;
+    let audioChunks = [];
+
+    // 대본을 4500자 단위로 분할
+    if (script.length > maxLength) {
+      console.log(`Script too long (${script.length} chars), splitting...`);
+      const parts = [];
+      for (let i = 0; i < script.length; i += maxLength) {
+        parts.push(script.substring(i, i + maxLength));
       }
-      audioChunks.push(Buffer.concat(chunks));
-      
-      // Rate limit 방지를 위해 1초 대기
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  } else {
-    // 짧은 대본은 한 번에 처리
-    const command = new SynthesizeSpeechCommand({
-      Text: script,
-      OutputFormat: 'mp3',
-      VoiceId: 'Seoyeon',
-      Engine: 'neural',
-      LanguageCode: 'ko-KR'
-    });
 
-    const response = await polly.send(command);
-    const chunks = [];
-    for await (const chunk of response.AudioStream) {
-      chunks.push(chunk);
+      // 각 부분을 순차적으로 처리
+      for (let i = 0; i < parts.length; i++) {
+        console.log(`Generating audio part ${i + 1}/${parts.length} with ElevenLabs`);
+
+        const response = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
+          {
+            method: 'POST',
+            headers: {
+              'Accept': 'audio/mpeg',
+              'Content-Type': 'application/json',
+              'xi-api-key': ELEVENLABS_API_KEY
+            },
+            body: JSON.stringify({
+              text: parts[i],
+              model_id: 'eleven_multilingual_v2',
+              voice_settings: VOICE_SETTINGS
+            })
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        audioChunks.push(Buffer.from(arrayBuffer));
+
+        // Rate limit 방지를 위해 1초 대기
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    } else {
+      // 짧은 대본은 한 번에 처리
+      console.log(`Generating audio with ElevenLabs (${script.length} chars)`);
+
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
+        {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': ELEVENLABS_API_KEY
+          },
+          body: JSON.stringify({
+            text: script,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: VOICE_SETTINGS
+          })
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      audioChunks.push(Buffer.from(arrayBuffer));
     }
-    audioChunks.push(Buffer.concat(chunks));
+
+    // 모든 오디오 청크를 하나로 합치기
+    const audioBuffer = Buffer.concat(audioChunks);
+    console.log(`Audio generated with ElevenLabs: ${audioBuffer.length} bytes`);
+
+    // S3에 업로드
+    const key = `podcasts/${id}.mp3`;
+    const audioUrl = `https://sedaily-news-xml-storage.s3.amazonaws.com/${key}`;
+
+    await s3.send(new PutObjectCommand({
+      Bucket: 'sedaily-news-xml-storage',
+      Key: key,
+      Body: audioBuffer,
+      ContentType: 'audio/mpeg'
+    }));
+
+    console.log(`Audio uploaded to S3: ${key}`);
+    console.log(`Audio URL: ${audioUrl}`);
+
+    // MP3 duration 계산 (ElevenLabs 평균 비트레이트 128kbps)
+    const bitrate = 128000;
+    const durationSeconds = Math.floor((audioBuffer.length * 8) / bitrate);
+
+    console.log(`Calculated duration: ${durationSeconds} seconds`);
+
+    const result = {
+      audioUrl: audioUrl,
+      duration: durationSeconds
+    };
+
+    console.log(`Returning audio result:`, JSON.stringify(result));
+
+    return result;
+  } catch (error) {
+    console.error('Error generating audio with ElevenLabs:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+
+    // 실패 시에도 duration은 반환
+    return {
+      audioUrl: '',
+      duration: Math.floor(script.length / 5)
+    };
   }
-  
-  // 모든 오디오 청크를 하나로 합치기
-  const audioBuffer = Buffer.concat(audioChunks);
-  console.log(`Audio generated: ${audioBuffer.length} bytes`);
-
-  // S3에 업로드
-  const key = `podcasts/${id}.mp3`;
-  const audioUrl = `https://sedaily-news-xml-storage.s3.amazonaws.com/${key}`;
-  
-  await s3.send(new PutObjectCommand({
-    Bucket: 'sedaily-news-xml-storage',
-    Key: key,
-    Body: audioBuffer,
-    ContentType: 'audio/mpeg'
-  }));
-  
-  console.log(`Audio uploaded to S3: ${key}`);
-  console.log(`Audio URL: ${audioUrl}`);
-
-  // MP3 duration 계산 (비트레이트 기반 추정)
-  // Polly Neural은 평균 24kbps 비트레이트 사용
-  const bitrate = 24000; // 24 kbps
-  const durationSeconds = Math.floor((audioBuffer.length * 8) / bitrate);
-  
-  console.log(`Calculated duration: ${durationSeconds} seconds`);
-
-  const result = {
-    audioUrl: audioUrl,
-    duration: durationSeconds
-  };
-  
-  console.log(`Returning audio result:`, JSON.stringify(result));
-  
-  return result;
-} catch (error) {
-  console.error('Error generating audio with Polly:', error);
-  console.error('Error details:', JSON.stringify(error, null, 2));
-  
-  // 실패 시에도 duration은 반환
-  return {
-    audioUrl: '',
-    duration: Math.floor(script.length / 5)
-  };
-}
 }
 
 async function fetchArticles(date) {

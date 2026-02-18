@@ -16,57 +16,73 @@ interface S3PodcastData {
   }>;
 }
 
-// S3에서 팟캐스트 데이터 가져오기
+// 날짜를 YYYYMMDD 형식으로 반환
+function getDateString(date: Date): string {
+  return date.toISOString().slice(0, 10).replace(/-/g, '');
+}
+
+// S3에서 팟캐스트 데이터 가져오기 (오늘 없으면 어제 데이터 사용)
 async function fetchPodcastsFromS3(): Promise<EconomyPodcast[]> {
-  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const S3_ENDPOINT = 'https://sedaily-news-xml-storage.s3.amazonaws.com/podcasts';
-  
-  try {
-    console.log(`Loading podcast data for ${today}...`);
-    const response = await fetch(`${S3_ENDPOINT}/data-${today}.json`);
-    
-    if (!response.ok) {
-      throw new Error('Today\'s podcast data not found');
-    }
-    
-    const data: S3PodcastData = await response.json();
-    console.log('Loaded data from S3:', data);
-    
-    // S3 데이터를 EconomyPodcast 배열로 변환
-    const podcasts: EconomyPodcast[] = Object.keys(data)
-      .filter(key => key !== '_connections')
-      .map(key => {
-        const podcast = data[key];
-        console.log(`Podcast ${key}:`, {
-          keyword: podcast.keyword,
-          audioUrl: podcast.audioUrl,
-          duration: podcast.duration
+
+  // 오늘과 어제 날짜
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+
+  const dates = [getDateString(today), getDateString(yesterday)];
+
+  for (const dateStr of dates) {
+    try {
+      console.log(`Loading podcast data for ${dateStr}...`);
+      const response = await fetch(`${S3_ENDPOINT}/data-${dateStr}.json`);
+
+      if (!response.ok) {
+        console.log(`No data for ${dateStr}, trying next...`);
+        continue;
+      }
+
+      const data: S3PodcastData = await response.json();
+      console.log(`Loaded data from S3 (${dateStr}):`, data);
+
+      // S3 데이터를 EconomyPodcast 배열로 변환
+      const podcasts: EconomyPodcast[] = Object.keys(data)
+        .filter(key => key !== '_connections')
+        .map(key => {
+          const podcast = data[key];
+          console.log(`Podcast ${key}:`, {
+            keyword: podcast.keyword,
+            audioUrl: podcast.audioUrl,
+            duration: podcast.duration
+          });
+          return {
+            keyword: podcast.keyword || '경제',
+            title: podcast.title || '',
+            duration: podcast.duration || 0,
+            audioUrl: podcast.audioUrl || '',
+            coverColor: podcast.coverColor || '#6b9b8e',
+            coverImage: podcast.coverImage || coverImage,
+            chartHeights: podcast.chartHeights || [60, 85, 45, 70, 55, 90],
+            summary: podcast.summary || {
+              keyPoints: [],
+              stats: [],
+              topics: []
+            },
+            transcript: podcast.transcript || [],
+            relatedKeywords: podcast.relatedKeywords || [],
+            articleUrl: '',
+            articleImage: podcast.coverImage || ''
+          };
         });
-        return {
-          keyword: podcast.keyword || '경제',
-          title: podcast.title || '',
-          duration: podcast.duration || 0,
-          audioUrl: podcast.audioUrl || '',
-          coverColor: podcast.coverColor || '#6b9b8e',
-          coverImage: podcast.coverImage || coverImage,
-          chartHeights: podcast.chartHeights || [60, 85, 45, 70, 55, 90],
-          summary: podcast.summary || {
-            keyPoints: [],
-            stats: [],
-            topics: []
-          },
-          transcript: podcast.transcript || [],
-          relatedKeywords: podcast.relatedKeywords || [],
-          articleUrl: '',
-          articleImage: podcast.coverImage || ''
-        };
-      });
-    
-    return podcasts;
-  } catch (error) {
-    console.error('Failed to load from S3:', error);
-    throw error;
+
+      return podcasts;
+    } catch (error) {
+      console.log(`Error loading ${dateStr}:`, error);
+      continue;
+    }
   }
+
+  // 모든 날짜에서 데이터를 찾지 못함
+  throw new Error('No podcast data available');
 }
 
 // 더미 데이터 (S3 로드 실패 시 사용)

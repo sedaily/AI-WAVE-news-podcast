@@ -1,0 +1,331 @@
+/* Morning Briefing Styles */
+
+.morning-briefing-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-base, #1a1614);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: morningFadeIn 0.4s ease-out;
+}
+
+@keyframes morningFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.morning-briefing-container {
+  width: 100%;
+  max-width: 420px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  padding-top: env(safe-area-inset-top, 20px);
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* Header */
+.morning-briefing-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.morning-close-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.morning-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Content */
+.morning-briefing-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+/* Greeting */
+.morning-greeting {
+  text-align: center;
+  animation: greetingSlideIn 0.5s ease-out 0.1s both;
+}
+
+@keyframes greetingSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.morning-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.morning-greeting h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #faf7f2);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.morning-subtitle {
+  font-size: 16px;
+  color: var(--text-muted, #b0a294);
+  margin: 0;
+}
+
+/* Loading */
+.morning-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-muted, #b0a294);
+}
+
+.morning-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--color-primary-500, #b8956a);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.morning-spinner.small {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error */
+.morning-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-error, #ef4444);
+}
+
+.morning-error button {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* Stats */
+.morning-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: statsSlideIn 0.5s ease-out 0.2s both;
+}
+
+@keyframes statsSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.morning-stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.morning-stat-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+}
+
+.morning-stat-card.primary {
+  background: rgba(184, 149, 106, 0.1);
+  border-color: rgba(184, 149, 106, 0.2);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted, #b0a294);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #faf7f2);
+  font-family: 'SF Mono', 'Menlo', monospace;
+}
+
+.morning-stat-card:not(.primary) .stat-value {
+  font-size: 20px;
+}
+
+.stat-value .stat-unit {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.stat-value.positive {
+  color: #22c55e;
+}
+
+.stat-value.negative {
+  color: #ef4444;
+}
+
+/* Play Button */
+.morning-play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 280px;
+  padding: 18px 32px;
+  background: var(--color-primary-500, #b8956a);
+  border: none;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: playBtnSlideIn 0.5s ease-out 0.3s both;
+}
+
+@keyframes playBtnSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.morning-play-btn:hover:not(:disabled) {
+  background: var(--color-primary-600, #a07d52);
+  transform: scale(1.02);
+}
+
+.morning-play-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.morning-play-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.morning-play-btn.playing {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--color-primary-500, #b8956a);
+  color: var(--color-primary-400, #c4a882);
+}
+
+.morning-play-btn.loading {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Footer */
+.morning-briefing-footer {
+  padding-top: 20px;
+  text-align: center;
+}
+
+.morning-dismiss-btn {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #b0a294);
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.morning-dismiss-btn:hover {
+  color: var(--text-primary, #faf7f2);
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .morning-briefing-container {
+    max-width: 480px;
+    padding: 40px;
+  }
+
+  .morning-greeting h1 {
+    font-size: 32px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+
+  .morning-stat-card:not(.primary) .stat-value {
+    font-size: 22px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .morning-briefing-overlay,
+  .morning-greeting,
+  .morning-stats,
+  .morning-play-btn {
+    animation: none;
+  }
+}

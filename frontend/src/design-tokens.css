@@ -1,0 +1,279 @@
+/**
+ * Design Tokens - 뉴스캐스트
+ *
+ * 디자인 원칙:
+ * - 토스 스타일의 깔끔하고 모던한 느낌
+ * - 밝고 친근한 라이트 테마
+ * - 웹 & 앱 동시 지원 (PWA)
+ * - 접근성 고려 (WCAG AA 준수)
+ */
+
+:root {
+  /* ========================================
+   * 1. COLOR PALETTE (토스 스타일)
+   * ======================================== */
+
+  /* Primary - Toss Blue/Purple */
+  --color-primary-50: #f0f4ff;
+  --color-primary-100: #e0e9ff;
+  --color-primary-200: #c7d7fe;
+  --color-primary-300: #a5bbfc;
+  --color-primary-400: #8198f8;
+  --color-primary-500: #6366f1;  /* Main - 토스 블루/퍼플 */
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+
+  /* Secondary - Teal/Mint */
+  --color-secondary-50: #f0fdfa;
+  --color-secondary-100: #ccfbf1;
+  --color-secondary-200: #99f6e4;
+  --color-secondary-300: #5eead4;
+  --color-secondary-400: #2dd4bf;
+  --color-secondary-500: #14b8a6;  /* Main - 민트 그린 */
+  --color-secondary-600: #0d9488;
+  --color-secondary-700: #0f766e;
+  --color-secondary-800: #115e59;
+  --color-secondary-900: #134e4a;
+
+  /* Accent - Warm Orange */
+  --color-accent-50: #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-200: #fed7aa;
+  --color-accent-300: #fdba74;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f97316;  /* Main - 오렌지 */
+  --color-accent-600: #ea580c;
+  --color-accent-700: #c2410c;
+  --color-accent-800: #9a3412;
+  --color-accent-900: #7c2d12;
+
+  /* Neutral - Gray Scale */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+  --color-neutral-950: #030712;
+
+  /* Semantic Colors */
+  --color-success: #22c55e;
+  --color-success-light: #dcfce7;
+  --color-success-bg: #f0fdf4;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-bg: #fffbeb;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-bg: #fef2f2;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+  --color-info-bg: #eff6ff;
+
+  /* ========================================
+   * 2. LIGHT THEME COLORS (토스 스타일)
+   * ======================================== */
+
+  /* Background Hierarchy */
+  --bg-base: #ffffff;                    /* 메인 배경 - 순백색 */
+  --bg-elevated: #ffffff;                /* 카드 배경 */
+  --bg-surface: var(--color-neutral-50); /* #f9fafb - 섹션 배경 */
+  --bg-muted: var(--color-neutral-100);  /* #f3f4f6 - 비활성 배경 */
+  --bg-overlay: rgba(0, 0, 0, 0.5);      /* 오버레이 */
+
+  /* Text Hierarchy */
+  --text-primary: var(--color-neutral-900);   /* #111827 - 메인 텍스트 */
+  --text-secondary: var(--color-neutral-600); /* #4b5563 - 보조 텍스트 */
+  --text-muted: var(--color-neutral-400);     /* #9ca3af - 비활성 텍스트 */
+  --text-disabled: var(--color-neutral-300);  /* #d1d5db */
+  --text-inverse: #ffffff;                     /* 반전 텍스트 */
+
+  /* Border */
+  --border-default: var(--color-neutral-200); /* #e5e7eb */
+  --border-subtle: var(--color-neutral-100);  /* #f3f4f6 */
+  --border-strong: var(--color-neutral-300);  /* #d1d5db */
+
+  /* Brand Colors */
+  --brand-primary: var(--color-primary-500);
+  --brand-primary-hover: var(--color-primary-600);
+  --brand-primary-active: var(--color-primary-700);
+  --brand-primary-light: var(--color-primary-50);
+
+  --brand-secondary: var(--color-secondary-500);
+  --brand-secondary-hover: var(--color-secondary-600);
+  --brand-secondary-light: var(--color-secondary-50);
+
+  --brand-accent: var(--color-accent-500);
+
+  /* ========================================
+   * 3. SPACING SYSTEM (4px base)
+   * ======================================== */
+
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ========================================
+   * 4. TYPOGRAPHY
+   * ======================================== */
+
+  --font-sans: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont,
+               'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
+
+  /* Font Size Scale */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+
+  /* Line Height */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Font Weight */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* ========================================
+   * 5. BORDER RADIUS (토스 스타일 - 큰 라운드)
+   * ======================================== */
+
+  --radius-none: 0;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-full: 9999px;
+
+  /* ========================================
+   * 6. SHADOWS (토스 스타일 - 부드러운 그림자)
+   * ======================================== */
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Card Shadows */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  /* ========================================
+   * 7. TRANSITIONS
+   * ======================================== */
+
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ========================================
+   * 8. Z-INDEX SCALE
+   * ======================================== */
+
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-fixed: 30;
+  --z-modal-backdrop: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-tooltip: 70;
+  --z-toast: 80;
+
+  /* ========================================
+   * 9. COMPONENT SPECIFIC
+   * ======================================== */
+
+  /* Buttons */
+  --btn-height-sm: 36px;
+  --btn-height-md: 44px;
+  --btn-height-lg: 52px;
+  --btn-height-xl: 56px;
+
+  /* Input Fields */
+  --input-height-sm: 40px;
+  --input-height-md: 48px;
+  --input-height-lg: 56px;
+
+  /* Cards */
+  --card-padding-sm: var(--space-4);
+  --card-padding-md: var(--space-5);
+  --card-padding-lg: var(--space-6);
+
+  /* Icons */
+  --icon-xs: 14px;
+  --icon-sm: 18px;
+  --icon-md: 24px;
+  --icon-lg: 32px;
+  --icon-xl: 48px;
+
+  /* Bottom Nav */
+  --bottom-nav-height: 64px;
+}
+
+/* Safe Area for iOS */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Focus Ring */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Smooth Scroll */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

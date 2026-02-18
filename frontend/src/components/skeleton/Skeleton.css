@@ -1,0 +1,138 @@
+/* Skeleton Loading Styles */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite ease-in-out;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Article Skeleton */
+.article-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.article-skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.article-skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.article-skeleton-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+/* Archive Skeleton */
+.archive-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.archive-skeleton-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.archive-skeleton-cover {
+  flex-shrink: 0;
+}
+
+.archive-skeleton-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Player Skeleton */
+.player-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+}
+
+.player-skeleton-cover {
+  display: flex;
+  justify-content: center;
+}
+
+.player-skeleton-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-skeleton-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+/* Stagger animation for lists */
+.skeleton-list-item {
+  opacity: 0;
+  animation: skeletonFadeIn 0.3s ease forwards;
+}
+
+.skeleton-list-item:nth-child(1) { animation-delay: 0ms; }
+.skeleton-list-item:nth-child(2) { animation-delay: 50ms; }
+.skeleton-list-item:nth-child(3) { animation-delay: 100ms; }
+.skeleton-list-item:nth-child(4) { animation-delay: 150ms; }
+.skeleton-list-item:nth-child(5) { animation-delay: 200ms; }
+
+@keyframes skeletonFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,391 @@
+/* Onboarding.css - 일본 감성 따뜻한 온보딩 */
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-base, #1a1614);
+  z-index: 9999;
+  display: flex;
+}
+
+/* 웹: 왼쪽 비주얼 영역 */
+.onboarding-visual {
+  display: none;
+  width: 45%;
+  background: linear-gradient(135deg, var(--bg-elevated, #231e1a) 0%, var(--bg-base, #1a1614) 100%);
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.onboarding-visual::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(184, 149, 106, 0.06) 0%, transparent 50%);
+  animation: pulse-bg 8s ease-in-out infinite;
+}
+
+@keyframes pulse-bg {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(5%, 5%); }
+}
+
+.visual-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.visual-badge {
+  display: inline-block;
+  width: fit-content;
+  padding: 6px 14px;
+  background: rgba(184, 149, 106, 0.15);
+  border: 1px solid rgba(184, 149, 106, 0.25);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary-400, #c4a882);
+  letter-spacing: 0.05em;
+  margin-bottom: 24px;
+}
+
+.visual-title {
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.03em;
+}
+
+.visual-desc {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 48px 0;
+}
+
+.visual-stats {
+  display: flex;
+  gap: 40px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-primary-400, #c4a882);
+}
+
+.stat-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* 오른쪽 폼 영역 */
+.onboarding-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Progress Bar */
+.onboarding-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--color-primary-500, #b8956a);
+  transition: width 0.4s ease;
+}
+
+/* Content Container */
+.onboarding-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 60px 40px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.onboarding-content.fade-out {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.onboarding-content.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step Container */
+.onboarding-step {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
+}
+
+.step-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.step-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+
+/* 웹 버전 (768px 이상) */
+@media (min-width: 768px) {
+  .onboarding-visual {
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Welcome Step */
+.welcome-sub {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.welcome-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.welcome-desc {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Question Step */
+.question-number {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary-400, #c4a882);
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.question-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.question-hint {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 32px 0;
+}
+
+/* Interest List - 웹: 그리드 / 모바일: 리스트 */
+.interest-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.interest-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interest-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.interest-item.selected {
+  background: rgba(184, 149, 106, 0.1);
+  border-color: var(--color-primary-500, #b8956a);
+}
+
+.interest-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary, #faf7f2);
+}
+
+.interest-check {
+  font-size: 14px;
+  color: var(--color-primary-400, #c4a882);
+  font-weight: 600;
+  width: 20px;
+  text-align: center;
+}
+
+/* Complete Step */
+.complete-step .step-content {
+  align-items: center;
+  text-align: center;
+}
+
+.complete-icon {
+  margin-bottom: 24px;
+  animation: scaleIn 0.5s ease forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.complete-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.complete-desc {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+/* Buttons */
+.btn-primary {
+  flex: 1;
+  padding: 16px 32px;
+  background: var(--color-primary-500, #b8956a);
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-600, #a07d52);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  background: var(--color-neutral-700, #4a4038);
+  color: var(--color-neutral-500, #958779);  /* WCAG 대비율 개선 */
+  cursor: not-allowed;
+}
+
+.btn-skip {
+  padding: 16px 24px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-skip:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 모바일 (768px 미만) */
+@media (max-width: 767px) {
+  .onboarding-content {
+    padding: 50px 24px 30px;
+  }
+
+  .onboarding-step {
+    max-width: 100%;
+  }
+
+  .welcome-title {
+    font-size: 32px;
+  }
+
+  .question-title {
+    font-size: 26px;
+  }
+
+  .interest-list {
+    grid-template-columns: 1fr;
+  }
+
+  .interest-item {
+    padding: 18px 20px;
+  }
+
+  .btn-primary {
+    padding: 18px 24px;
+    font-size: 16px;
+  }
+
+  .btn-skip {
+    border: none;
+  }
+}

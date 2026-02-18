@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>경제뉴스캐스트 - Player V2 와이어프레임</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .wireframe-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .wireframe-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .wireframe-header h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #4ecdc4, #45b7aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .wireframe-header p {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .wireframe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .wireframe-card {
+      background: #1a1a1a;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .wireframe-card-header {
+      padding: 20px 24px;
+      background: #242424;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wireframe-card-header h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .version-badge {
+      background: linear-gradient(135deg, #4ecdc4, #45b7aa);
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .version-badge.current {
+      background: #333;
+      color: #888;
+    }
+
+    .wireframe-card-body {
+      padding: 24px;
+    }
+
+    /* ===== Player Mockup ===== */
+    .player-mockup {
+      background: linear-gradient(180deg, #1e1e1e 0%, #0f0f0f 100%);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .player-artwork {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+      border-radius: 16px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .player-info h4 {
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .player-info p {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 20px;
+    }
+
+    .player-progress {
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 35%;
+      background: linear-gradient(90deg, #4ecdc4, #45b7aa);
+      border-radius: 2px;
+    }
+
+    .progress-times {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .control-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .control-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .control-btn.play {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #4ecdc4, #45b7aa);
+      font-size: 1.5rem;
+    }
+
+    .control-btn.play:hover {
+      transform: scale(1.05);
+    }
+
+    /* ===== NEW: Speed Control ===== */
+    .speed-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+    }
+
+    .speed-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .speed-btn:hover {
+      border-color: #4ecdc4;
+      color: #4ecdc4;
+    }
+
+    .speed-btn.active {
+      background: #4ecdc4;
+      border-color: #4ecdc4;
+      color: #000;
+      font-weight: 600;
+    }
+
+    /* ===== NEW: Audio Effects ===== */
+    .audio-effects {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .effect-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .effect-toggle:hover {
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .effect-toggle.active {
+      background: rgba(78, 205, 196, 0.15);
+      border-color: #4ecdc4;
+      color: #4ecdc4;
+    }
+
+    .effect-icon {
+      font-size: 1rem;
+    }
+
+    /* ===== NEW: Action Buttons ===== */
+    .player-actions {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .action-btn:hover {
+      color: #4ecdc4;
+    }
+
+    .action-btn .icon {
+      font-size: 1.3rem;
+    }
+
+    /* ===== Sleep Timer Popup ===== */
+    .sleep-timer-popup {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    .sleep-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    .sleep-option {
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    /* ===== Comparison Arrows ===== */
+    .comparison-section {
+      text-align: center;
+      margin: 40px 0;
+    }
+
+    .comparison-section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+
+    .comparison-section p {
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 24px;
+    }
+
+    /* ===== Feature List ===== */
+    .feature-list {
+      margin-top: 20px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(78, 205, 196, 0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .feature-text h5 {
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .feature-text p {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .new-badge {
+      background: #ff6b6b;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    /* ===== Stats Section ===== */
+    .stats-mockup {
+      background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(69, 183, 170, 0.05));
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 20px;
+      border: 1px solid rgba(78, 205, 196, 0.2);
+    }
+
+    .stats-title {
+      font-size: 0.9rem;
+      color: #4ecdc4;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .stat-box {
+      text-align: center;
+      padding: 16px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #4ecdc4;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+      margin-top: 4px;
+    }
+
+    /* ===== Mobile Frame ===== */
+    .mobile-frame {
+      width: 100%;
+      max-width: 375px;
+      margin: 0 auto;
+      background: #000;
+      border-radius: 40px;
+      padding: 12px;
+      border: 3px solid #333;
+    }
+
+    .mobile-screen {
+      background: #121212;
+      border-radius: 32px;
+      overflow: hidden;
+      min-height: 600px;
+    }
+
+    .mobile-notch {
+      width: 120px;
+      height: 28px;
+      background: #000;
+      border-radius: 0 0 20px 20px;
+      margin: 0 auto;
+    }
+
+    /* ===== Annotations ===== */
+    .annotation {
+      position: relative;
+    }
+
+    .annotation::after {
+      content: attr(data-note);
+      position: absolute;
+      right: -200px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #4ecdc4;
+      color: #000;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .annotation::before {
+      content: '';
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      width: 20px;
+      height: 2px;
+      background: #4ecdc4;
+    }
+
+    /* ===== Tab Navigation ===== */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 30px;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #4ecdc4, #45b7aa);
+      border-color: transparent;
+      color: #000;
+      font-weight: 600;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="wireframe-container">
+    <div class="wireframe-header">
+      <h1>경제뉴스캐스트 V2 와이어프레임</h1>
+      <p>Player 기능 강화 - Pocket Casts 스타일</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="showTab('player')">플레이어</button>
+      <button class="tab-btn" onclick="showTab('home')">홈 화면</button>
+      <button class="tab-btn" onclick="showTab('stats')">통계</button>
+    </div>
+
+    <!-- Player Tab -->
+    <div id="player-tab" class="tab-content active">
+      <div class="wireframe-grid">
+        <!-- Current Version -->
+        <div class="wireframe-card">
+          <div class="wireframe-card-header">
+            <h3>현재 버전</h3>
+            <span class="version-badge current">V1</span>
+          </div>
+          <div class="wireframe-card-body">
+            <div class="player-mockup">
+              <div class="player-artwork">🎙️</div>
+              <div class="player-info">
+                <h4>반도체 업황 회복 신호</h4>
+                <p>오늘의 경제 브리핑</p>
+              </div>
+              <div class="player-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill"></div>
+                </div>
+                <div class="progress-times">
+                  <span>1:23</span>
+                  <span>3:45</span>
+                </div>
+              </div>
+              <div class="player-controls">
+                <button class="control-btn">⏮️</button>
+                <button class="control-btn play">▶️</button>
+                <button class="control-btn">⏭️</button>
+              </div>
+            </div>
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-icon">▶️</div>
+                <div class="feature-text">
+                  <h5>기본 재생</h5>
+                  <p>재생/일시정지, 이전/다음</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <div class="feature-text">
+                  <h5>프로그레스 바</h5>
+                  <p>재생 위치 표시</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Version -->
+        <div class="wireframe-card">
+          <div class="wireframe-card-header">
+            <h3>개선 버전</h3>
+            <span class="version-badge">V2 NEW</span>
+          </div>
+          <div class="wireframe-card-body">
+            <div class="player-mockup">
+              <div class="player-artwork">🎙️</div>
+              <div class="player-info">
+                <h4>반도체 업황 회복 신호</h4>
+                <p>오늘의 경제 브리핑</p>
+              </div>
+              <div class="player-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill"></div>
+                </div>
+                <div class="progress-times">
+                  <span>1:23</span>
+                  <span>3:45</span>
+                </div>
+              </div>
+
+              <!-- NEW: Skip Controls -->
+              <div class="player-controls">
+                <button class="control-btn" title="-10초">
+                  <span style="font-size:0.7rem; position:relative;">
+                    ↺<span style="font-size:0.5rem; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">10</span>
+                  </span>
+                </button>
+                <button class="control-btn">⏮️</button>
+                <button class="control-btn play">▶️</button>
+                <button class="control-btn">⏭️</button>
+                <button class="control-btn" title="+10초">
+                  <span style="font-size:0.7rem; position:relative;">
+                    ↻<span style="font-size:0.5rem; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">10</span>
+                  </span>
+                </button>
+              </div>
+
+              <!-- NEW: Speed Control -->
+              <div class="speed-control">
+                <button class="speed-btn">0.5x</button>
+                <button class="speed-btn">0.75x</button>
+                <button class="speed-btn active">1x</button>
+                <button class="speed-btn">1.25x</button>
+                <button class="speed-btn">1.5x</button>
+                <button class="speed-btn">2x</button>
+              </div>
+
+              <!-- NEW: Audio Effects -->
+              <div class="audio-effects">
+                <div class="effect-toggle">
+                  <span class="effect-icon">🔊</span>
+                  <span>볼륨 부스트</span>
+                </div>
+                <div class="effect-toggle active">
+                  <span class="effect-icon">⏩</span>
+                  <span>무음 제거</span>
+                </div>
+              </div>
+
+              <!-- NEW: Action Buttons -->
+              <div class="player-actions">
+                <button class="action-btn">
+                  <span class="icon">🔖</span>
+                  <span>북마크</span>
+                </button>
+                <button class="action-btn">
+                  <span class="icon">💤</span>
+                  <span>슬립타이머</span>
+                </button>
+                <button class="action-btn">
+                  <span class="icon">📤</span>
+                  <span>공유</span>
+                </button>
+                <button class="action-btn">
+                  <span class="icon">📋</span>
+                  <span>스크립트</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-icon">⏩</div>
+                <div class="feature-text">
+                  <h5>배속 조절 <span class="new-badge">NEW</span></h5>
+                  <p>0.5x ~ 2x, 6단계 속도</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">⏪</div>
+                <div class="feature-text">
+                  <h5>10초 건너뛰기 <span class="new-badge">NEW</span></h5>
+                  <p>앞/뒤 10초 이동</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">🔊</div>
+                <div class="feature-text">
+                  <h5>오디오 효과 <span class="new-badge">NEW</span></h5>
+                  <p>볼륨 부스트, 무음 제거</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">💤</div>
+                <div class="feature-text">
+                  <h5>슬립 타이머 <span class="new-badge">NEW</span></h5>
+                  <p>5분/15분/30분/1시간</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">🔖</div>
+                <div class="feature-text">
+                  <h5>북마크 <span class="new-badge">NEW</span></h5>
+                  <p>중요 구간 저장</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Tab -->
+    <div id="home-tab" class="tab-content">
+      <div class="wireframe-grid">
+        <div class="wireframe-card">
+          <div class="wireframe-card-header">
+            <h3>미니 플레이어 (하단 고정)</h3>
+            <span class="version-badge">V2 NEW</span>
+          </div>
+          <div class="wireframe-card-body">
+            <div style="background: #1e1e1e; border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+              <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #2a2a2a, #1a1a1a); border-radius: 8px; display: flex; align-items: center; justify-content: center;">🎙️</div>
+              <div style="flex: 1;">
+                <div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 4px;">반도체 업황 회복 신호</div>
+                <div style="height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px;">
+                  <div style="width: 35%; height: 100%; background: #4ecdc4; border-radius: 2px;"></div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <button style="background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer;">⏸️</button>
+                <button style="background: none; border: none; color: #fff; font-size: 1rem; cursor: pointer;">⏭️</button>
+              </div>
+            </div>
+            <p style="font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 16px; text-align: center;">
+              → 탭하면 전체 플레이어로 확장
+            </p>
+          </div>
+        </div>
+
+        <div class="wireframe-card">
+          <div class="wireframe-card-header">
+            <h3>위젯 디자인 (홈 화면)</h3>
+            <span class="version-badge">FUTURE</span>
+          </div>
+          <div class="wireframe-card-body">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+              <!-- Small Widget -->
+              <div style="background: linear-gradient(135deg, #1e1e1e, #0f0f0f); border-radius: 20px; padding: 16px; aspect-ratio: 1;">
+                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 8px;">오늘의 브리핑</div>
+                <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px;">반도체 업황 회복</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 32px; height: 32px; background: #4ecdc4; border-radius: 50%; display: flex; align-items: center; justify-content: center;">▶️</div>
+                  <span style="font-size: 0.75rem; color: rgba(255,255,255,0.5);">3:45</span>
+                </div>
+              </div>
+              <!-- Large Widget -->
+              <div style="background: linear-gradient(135deg, #1e1e1e, #0f0f0f); border-radius: 20px; padding: 16px; aspect-ratio: 1;">
+                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 8px;">다음 뉴스</div>
+                <div style="font-size: 0.8rem; margin-bottom: 4px;">환율 동향</div>
+                <div style="font-size: 0.8rem; margin-bottom: 4px;">부동산 이슈</div>
+                <div style="font-size: 0.8rem; color: rgba(255,255,255,0.5);">+3개 더보기</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Tab -->
+    <div id="stats-tab" class="tab-content">
+      <div class="wireframe-grid">
+        <div class="wireframe-card">
+          <div class="wireframe-card-header">
+            <h3>청취 통계</h3>
+            <span class="version-badge">V2 NEW</span>
+          </div>
+          <div class="wireframe-card-body">
+            <div class="stats-mockup">
+              <div class="stats-title">
+                ⏱️ 이번 주 청취 기록
+              </div>
+              <div class="stats-grid">
+                <div class="stat-box">
+                  <div class="stat-value">2.5h</div>
+                  <div class="stat-label">총 청취 시간</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">45분</div>
+                  <div class="stat-label">배속으로 절약</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">12회</div>
+                  <div class="stat-label">청취한 에피소드</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">85%</div>
+                  <div class="stat-label">평균 완료율</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 24px;">
+              <h4 style="font-size: 0.9rem; margin-bottom: 16px; color: #4ecdc4;">🏆 청취 스트릭</h4>
+              <div style="display: flex; gap: 8px; justify-content: center;">
+                <div style="width: 36px; height: 36px; background: #4ecdc4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">월</div>
+                <div style="width: 36px; height: 36px; background: #4ecdc4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">화</div>
+                <div style="width: 36px; height: 36px; background: #4ecdc4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">수</div>
+                <div style="width: 36px; height: 36px; background: #4ecdc4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">목</div>
+                <div style="width: 36px; height: 36px; background: #4ecdc4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">금</div>
+                <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: rgba(255,255,255,0.3);">토</div>
+                <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: rgba(255,255,255,0.3);">일</div>
+              </div>
+              <p style="text-align: center; margin-top: 12px; font-size: 0.85rem;">🔥 5일 연속 청취 중!</p>
+            </div>
+
+            <div style="margin-top: 24px;">
+              <h4 style="font-size: 0.9rem; margin-bottom: 16px; color: #4ecdc4;">🎖️ 획득한 배지</h4>
+              <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <div style="text-align: center;">
+                  <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #ffd700, #ffaa00); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 1.5rem;">🎧</div>
+                  <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">첫 청취</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #c0c0c0, #a0a0a0); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 1.5rem;">🔥</div>
+                  <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">3일 스트릭</div>
+                </div>
+                <div style="text-align: center;">
+                  <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #cd7f32, #b87333); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 1.5rem;">📚</div>
+                  <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">10회 청취</div>
+                </div>
+                <div style="text-align: center; opacity: 0.3;">
+                  <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 1.5rem;">🏆</div>
+                  <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">7일 스트릭</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wireframe-card">
+          <div class="wireframe-card-header">
+            <h3>관심 분야 분석</h3>
+            <span class="version-badge">V2 NEW</span>
+          </div>
+          <div class="wireframe-card-body">
+            <div style="margin-bottom: 24px;">
+              <h4 style="font-size: 0.9rem; margin-bottom: 16px;">📊 카테고리별 청취 시간</h4>
+
+              <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                  <span>반도체·테크</span>
+                  <span>45%</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                  <div style="width: 45%; height: 100%; background: #4ecdc4; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                  <span>부동산</span>
+                  <span>25%</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                  <div style="width: 25%; height: 100%; background: #45b7aa; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                  <span>금융·투자</span>
+                  <span>20%</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                  <div style="width: 20%; height: 100%; background: #3da89b; border-radius: 4px;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                  <span>기타</span>
+                  <span>10%</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                  <div style="width: 10%; height: 100%; background: #35998c; border-radius: 4px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background: rgba(78, 205, 196, 0.1); border-radius: 12px; padding: 16px; border: 1px solid rgba(78, 205, 196, 0.2);">
+              <div style="font-size: 0.85rem; margin-bottom: 8px;">💡 AI 추천</div>
+              <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">
+                "반도체·테크 분야에 관심이 많으시네요! 오늘 TSMC 관련 뉴스가 있습니다."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Speed button interaction
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Effect toggle interaction
+    document.querySelectorAll('.effect-toggle').forEach(toggle => {
+      toggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+      });
+    });
+  </script>
+</body>
+</html>
